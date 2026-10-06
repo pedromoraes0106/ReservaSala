@@ -1,0 +1,117 @@
+package br.ifsp.demo.reserva.service;
+
+import br.ifsp.demo.reserva.domain.PeriodoReserva;
+import br.ifsp.demo.reserva.domain.Reserva;
+import br.ifsp.demo.reserva.domain.Sala;
+import br.ifsp.demo.reserva.domain.StatusReserva;
+import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
+import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
+import br.ifsp.demo.reserva.repository.ReservaRepository;
+import br.ifsp.demo.reserva.repository.SalaRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+public class ReservaServiceTddTest {
+
+    private ReservaService service;
+    private final Map<UUID, Sala> salas = new ConcurrentHashMap<>();
+    private final Map<UUID, Reserva> reservas = new ConcurrentHashMap<>();
+
+    @BeforeEach
+    void setUp() {
+        SalaRepository salaRepository = new SalaRepository() {
+            @Override
+            public Optional<Sala> buscarPorId(UUID id) {
+                return Optional.ofNullable(salas.get(id));
+            }
+
+            @Override
+            public Sala salvar(Sala sala) {
+                salas.put(sala.getId(), sala);
+                return sala;
+            }
+        };
+
+        ReservaRepository reservaRepository = new ReservaRepository() {
+            @Override
+            public List<Reserva> buscarPorSalaEPeriodo(UUID salaId, LocalDateTime inicio, LocalDateTime fim) {
+                return reservas.values().stream()
+                        .filter(reserva -> reserva.getSalaId().equals(salaId))
+                        .filter(reserva -> reserva.getStatus() == StatusReserva.CONFIRMADA)
+                        .filter(reserva -> reserva.getPeriodo().temSobreposicaoCom(inicio, fim))
+                        .toList();
+            }
+
+            @Override
+            public Reserva salvar(Reserva reserva) {
+                reservas.put(reserva.getId(), reserva);
+                return reserva;
+            }
+        };
+
+        service = new ReservaService(salaRepository, reservaRepository);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveCriarReservaQuandoSalaDisponivel() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reserva = service.criarReserva(sala.getId(), "Pedro", periodo);
+
+        assertThat(reserva.getStatus()).isEqualTo(StatusReserva.CONFIRMADA);
+        assertThat(reserva.getSolicitante()).isEqualTo("Pedro");
+        assertThat(reserva.getSalaId()).isEqualTo(sala.getId());
+        assertThat(reserva.getPeriodo()).isEqualTo(periodo);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarPeriodoInvalido() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        assertThatThrownBy(() -> new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 12, 0),
+                LocalDateTime.of(2026, 10, 10, 9, 0)
+        ))
+                .isInstanceOf(PeriodoInvalidoException.class)
+                .hasMessageContaining("período inválido");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarSalaInexistente() {
+        UUID idInexistente = UUID.randomUUID();
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        assertThatThrownBy(() -> service.criarReserva(idInexistente, "Pedro", periodo))
+                .isInstanceOf(SalaNaoEncontradaException.class)
+                .hasMessageContaining("não existe");
+    }
+}
