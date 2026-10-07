@@ -17,6 +17,8 @@ public class PeriodoReserva {
         this.fim = fim;
     }
 
+
+
     public LocalDateTime getInicio() {
         return inicio;
     }

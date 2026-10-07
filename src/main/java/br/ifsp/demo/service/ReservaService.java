@@ -21,6 +21,11 @@ public class ReservaService {
     }
 
     public boolean verificarDisponibilidade(UUID id, LocalDate dia, LocalDateTime inicio, LocalDateTime fim) {
+        return verificarDisponibilidade(id, dia, inicio, fim, null);
+    }
+
+    private boolean verificarDisponibilidade(UUID id, LocalDate dia, LocalDateTime inicio,
+                                              LocalDateTime fim, UUID idReservaIgnorada) {
         Optional<Sala> sala = salaRepository.findById(id);
         if (sala.isEmpty() || inicio == null || fim == null || !inicio.isBefore(fim)) {
             return false;
@@ -28,17 +33,24 @@ public class ReservaService {
 
         List<Reserva> reservas = reservaRepository.findConfirmadasPorSalaEDia(id, dia);
 
-        return reservas.stream().noneMatch(reserva ->
-                inicio.isBefore(reserva.getPeriodo().getFim())
+        return reservas.stream()
+            .filter(reserva -> idReservaIgnorada == null || !idReservaIgnorada.equals(reserva.getId()))
+            .noneMatch(reserva -> inicio.isBefore(reserva.getPeriodo().getFim())
                         && reserva.getPeriodo().getInicio().isBefore(fim));
     }
 
     public void editarReserva(Reserva reservaEditada) {
-        if(reservaEditada == null) return;
+        if (reservaEditada == null || reservaEditada.getPeriodo() == null
+            || reservaEditada.getPeriodo().getInicio() == null
+            || reservaEditada.getPeriodo().getFim() == null) return;
 
         Optional<Reserva> reserva = reservaRepository.findById(reservaEditada.getId());
+        if (reserva.isEmpty()) return;
 
-        if(reserva.isEmpty()) return;
+        LocalDateTime inicio = reservaEditada.getPeriodo().getInicio();
+        LocalDateTime fim = reservaEditada.getPeriodo().getFim();
+        if (!verificarDisponibilidade(reservaEditada.getSalaId(), inicio.toLocalDate(), inicio, fim,
+            reservaEditada.getId())) return;
 
         reserva.get().setSalaId(reservaEditada.getSalaId());
         reserva.get().setSolicitante(reservaEditada.getSolicitante());
@@ -46,7 +58,6 @@ public class ReservaService {
         reserva.get().setStatus(reservaEditada.getStatus());
 
         reservaRepository.update(reserva.get());
-        
     }
 }
 

@@ -23,6 +23,7 @@ public class Reserva {
     }
 
     public void setPeriodo(PeriodoReserva periodo) {
+
         this.periodo = periodo;
     }
 
