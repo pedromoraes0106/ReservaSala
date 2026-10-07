@@ -32,5 +32,21 @@ public class ReservaService {
                 inicio.isBefore(reserva.getPeriodo().getFim())
                         && reserva.getPeriodo().getInicio().isBefore(fim));
     }
+
+    public void editarReserva(Reserva reservaEditada) {
+        if(reservaEditada == null) return;
+
+        Optional<Reserva> reserva = reservaRepository.findById(reservaEditada.getId());
+
+        if(reserva.isEmpty()) return;
+
+        reserva.get().setSalaId(reservaEditada.getSalaId());
+        reserva.get().setSolicitante(reservaEditada.getSolicitante());
+        reserva.get().setPeriodo(reservaEditada.getPeriodo());
+        reserva.get().setStatus(reservaEditada.getStatus());
+
+        reservaRepository.update(reserva.get());
+        
+    }
 }
 

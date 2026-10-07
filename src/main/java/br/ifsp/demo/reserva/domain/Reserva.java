@@ -5,10 +5,10 @@ import java.util.UUID;
 
 public class Reserva {
     private final UUID id;
-    private final UUID salaId;
-    private final String solicitante;
-    private final PeriodoReserva periodo;
-    private final StatusReserva status;
+    private  UUID salaId;
+    private  String solicitante;
+    private  PeriodoReserva periodo;
+    private  StatusReserva status;
 
     public Reserva(UUID id, UUID salaId, String solicitante, PeriodoReserva periodo, StatusReserva status) {
         this.id = id;
@@ -20,6 +20,22 @@ public class Reserva {
 
     public UUID getId() {
         return id;
+    }
+
+    public void setPeriodo(PeriodoReserva periodo) {
+        this.periodo = periodo;
+    }
+
+    public void setSalaId(UUID salaId) {
+        this.salaId = salaId;
+    }
+
+    public void setSolicitante(String solicitante) {
+        this.solicitante = solicitante;
+    }
+
+    public void setStatus(StatusReserva status) {
+        this.status = status;
     }
 
     public UUID getSalaId() {
