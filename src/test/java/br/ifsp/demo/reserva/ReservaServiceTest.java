@@ -19,6 +19,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 public class ReservaServiceTest {
     @Test
@@ -82,5 +83,37 @@ public class ReservaServiceTest {
                 idInexistente, dia, LocalTime.of(11, 0), LocalTime.of(13, 0));
 
         assertThat(disponivel).isFalse();
+    }
+
+    @Test
+    @DisplayName("Deve validar a edição da reserva")
+    void ValidarEdicaoReserva(){
+        SalaRepository salaRepository = mock(SalaRepository.class);
+        ReservaRepository reservaRepository = mock(ReservaRepository.class);
+        ReservaService service = new ReservaService(salaRepository, reservaRepository);
+
+        Sala sala = new Sala("Lab 1", 50);
+
+        when(salaRepository.findById(sala.getId())).thenReturn(Optional.of(sala));
+
+
+        Reserva reserva = new Reserva(UUID.randomUUID(), sala.getId(),
+                "solicitante",new PeriodoReserva(LocalTime.of(12,0),
+                LocalTime.of(13,0)), StatusReserva.CONFIRMADA);
+
+        when(reservaRepository.findById(reserva.getId()))
+        .thenReturn(Optional.of(reserva));
+
+        Reserva reservaEditada = new Reserva(
+            reserva.getId(),
+            sala.getId(),
+            reserva.getSolicitante(),
+            new PeriodoReserva(LocalTime.of(14, 0), LocalTime.of(15, 0)),
+            reserva.getStatus()
+        );
+        
+        service.editarReserva(reservaEditada);
+
+        verify(reservaRepository).update(reservaEditada);
     }
 }
