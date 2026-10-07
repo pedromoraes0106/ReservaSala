@@ -19,8 +19,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
 
 public class ReservaServiceTest {
     @Test
@@ -110,6 +112,8 @@ public class ReservaServiceTest {
 
         when(reservaRepository.findById(reserva.getId()))
         .thenReturn(Optional.of(reserva));
+        when(reservaRepository.findConfirmadasPorSalaEDia(sala.getId(),
+                LocalDate.of(2026, 10, 10))).thenReturn(List.of(reserva));
 
         Reserva reservaEditada = new Reserva(
             reserva.getId(),
@@ -123,6 +127,47 @@ public class ReservaServiceTest {
         service.editarReserva(reservaEditada);
 
         verify(reservaRepository).update(reservaEditada);
+    }
+
+    @Test
+    @DisplayName("Deve Informar conflito caso o período não esteja disponivel")
+    void ValidarConflitoDeHorarioEdicao(){
+        SalaRepository salaRepository = mock(SalaRepository.class);
+        ReservaRepository reservaRepository = mock(ReservaRepository.class);
+        ReservaService service = new ReservaService(salaRepository, reservaRepository);
+
+        Sala sala = new Sala("Lab 1", 50);
+
+        when(salaRepository.findById(sala.getId())).thenReturn(Optional.of(sala));
+
+        Reserva reserva = new Reserva(UUID.randomUUID(), sala.getId(),
+                "solicitante",new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(12,0)),
+                LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(13,0))),
+                StatusReserva.CONFIRMADA);
+
+        Reserva reserva2 = new Reserva(UUID.randomUUID(), sala.getId(),
+                "solicitante",new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(14,0)),
+                LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(17,0))),
+                StatusReserva.CONFIRMADA);
+
+        LocalDate dia = reserva.getPeriodo().getInicio().toLocalDate();
+
+        when(reservaRepository.findConfirmadasPorSalaEDia(sala.getId(), dia))
+                .thenReturn(List.of(reserva, reserva2));
+        when(reservaRepository.findById(reserva.getId())).thenReturn(Optional.of(reserva));
+
+        Reserva reservaEditada = new Reserva(
+                reserva.getId(),
+                sala.getId(),
+                reserva.getSolicitante(),
+                new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(14, 0)),
+                        LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(15, 0))),
+                reserva.getStatus()
+        );
+
+        service.editarReserva(reservaEditada);
+
+        verify(reservaRepository, never()).update(any(Reserva.class));
     }
 
 
