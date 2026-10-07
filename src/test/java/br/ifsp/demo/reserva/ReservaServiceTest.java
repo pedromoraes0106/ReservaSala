@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class ReservaServiceTest {
                 .thenReturn(List.of());
 
         boolean disponivel = service.verificarDisponibilidade(sala.getId(),dia,
-                LocalTime.of(10,0),LocalTime.of(12,0));
+                LocalDateTime.of(dia,LocalTime.of(10,0)),LocalDateTime.of(dia,LocalTime.of(12,0)));
 
         assertThat(disponivel).isTrue();
     }
@@ -53,16 +54,20 @@ public class ReservaServiceTest {
         LocalDate dia = LocalDate.of(2020, 1, 1);
 
         Reserva reserva = new Reserva(UUID.randomUUID(), sala.getId(), "solicitante",
-                new PeriodoReserva(LocalTime.of(10, 0), LocalTime.of(12, 0)), StatusReserva.CONFIRMADA);
+                new PeriodoReserva(LocalDateTime.of(dia,LocalTime.of(10, 0)),
+                        LocalDateTime.of(dia,LocalTime.of(12, 0))), StatusReserva.CONFIRMADA);
 
         when(salaRepository.findById(sala.getId())).thenReturn(Optional.of(sala));
         when(reservaRepository.findConfirmadasPorSalaEDia(sala.getId(), dia)).thenReturn(List.of(reserva));
 
-        boolean conflito = service.verificarDisponibilidade(sala.getId(), dia, LocalTime.of(11, 0), LocalTime.of(13, 0));
+        boolean conflito = service.verificarDisponibilidade(sala.getId(), dia,
+                LocalDateTime.of(dia,LocalTime.of(11, 0)),
+                LocalDateTime.of(dia,LocalTime.of(13, 0)));
 
         assertThat(conflito).isFalse();
 
-        boolean naoConflito = service.verificarDisponibilidade(sala.getId(), dia, LocalTime.of(13, 0), LocalTime.of(14, 0));
+        boolean naoConflito = service.verificarDisponibilidade(sala.getId(), dia,
+                LocalDateTime.of(dia,LocalTime.of(13, 0)), LocalDateTime.of(dia,LocalTime.of(14, 0)));
 
         assertThat(naoConflito).isTrue();
     }
@@ -80,7 +85,7 @@ public class ReservaServiceTest {
         when(salaRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
         boolean disponivel = service.verificarDisponibilidade(
-                idInexistente, dia, LocalTime.of(11, 0), LocalTime.of(13, 0));
+                idInexistente, dia, LocalDateTime.of(dia,LocalTime.of(11, 0)), LocalDateTime.of(dia,LocalTime.of(13, 0)));
 
         assertThat(disponivel).isFalse();
     }
@@ -98,8 +103,10 @@ public class ReservaServiceTest {
 
 
         Reserva reserva = new Reserva(UUID.randomUUID(), sala.getId(),
-                "solicitante",new PeriodoReserva(LocalTime.of(12,0),
-                LocalTime.of(13,0)), StatusReserva.CONFIRMADA);
+                "solicitante",
+                new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(12,0)),
+                LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(13,0))),
+                StatusReserva.CONFIRMADA);
 
         when(reservaRepository.findById(reserva.getId()))
         .thenReturn(Optional.of(reserva));
@@ -108,7 +115,8 @@ public class ReservaServiceTest {
             reserva.getId(),
             sala.getId(),
             reserva.getSolicitante(),
-            new PeriodoReserva(LocalTime.of(14, 0), LocalTime.of(15, 0)),
+            new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(14, 0)),
+                    LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(15, 0))),
             reserva.getStatus()
         );
         
@@ -116,4 +124,6 @@ public class ReservaServiceTest {
 
         verify(reservaRepository).update(reservaEditada);
     }
+
+
 }

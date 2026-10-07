@@ -2,14 +2,14 @@ package br.ifsp.demo.reserva.domain;
 
 import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class PeriodoReserva {
-    private final LocalTime inicio;
-    private final LocalTime fim;
+    private final LocalDateTime inicio;
+    private final LocalDateTime fim;
 
-    public PeriodoReserva(LocalTime inicio, LocalTime fim) {
+    public PeriodoReserva(LocalDateTime inicio, LocalDateTime fim) {
         if (inicio == null || fim == null || !fim.isAfter(inicio)) {
             throw new PeriodoInvalidoException("período inválido: a data final deve ser posterior à data inicial.");
         }
@@ -17,11 +17,11 @@ public class PeriodoReserva {
         this.fim = fim;
     }
 
-    public LocalTime getInicio() {
+    public LocalDateTime getInicio() {
         return inicio;
     }
 
-    public LocalTime getFim() {
+    public LocalDateTime getFim() {
         return fim;
     }
 

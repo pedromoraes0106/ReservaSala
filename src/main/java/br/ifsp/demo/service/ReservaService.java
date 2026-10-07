@@ -6,7 +6,7 @@ import br.ifsp.demo.repository.SalaRepository;
 import br.ifsp.demo.reserva.domain.Reserva;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,7 +20,7 @@ public class ReservaService {
         this.reservaRepository = reservaRepository;
     }
 
-    public boolean verificarDisponibilidade(UUID id, LocalDate dia, LocalTime inicio, LocalTime fim) {
+    public boolean verificarDisponibilidade(UUID id, LocalDate dia, LocalDateTime inicio, LocalDateTime fim) {
         Optional<Sala> sala = salaRepository.findById(id);
         if (sala.isEmpty() || inicio == null || fim == null || !inicio.isBefore(fim)) {
             return false;
