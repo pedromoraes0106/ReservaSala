@@ -6,6 +6,7 @@ import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.repository.ReservaRepository;
 import br.ifsp.demo.repository.SalaRepository;
 import br.ifsp.demo.reserva.domain.StatusReserva;
+import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.service.ReservaService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -206,6 +207,33 @@ public class ReservaServiceTest {
 
         assertThat(reservaCancelada.getStatus()).isEqualTo(StatusReserva.CANCELADA);
         assertThat(reservaCancelada.getSolicitante()).isEqualTo("solicitante");
+        verify(reservaRepository, never()).update(any(Reserva.class));
+    }
+
+    @Test
+    @DisplayName("deve rejeitar se a reserva nao existir")
+    void validarEdicaoReservaInexistente() {
+        ReservaRepository reservaRepository = mock(ReservaRepository.class);
+        SalaRepository salaRepository = mock(SalaRepository.class);
+        ReservaService service = new ReservaService(salaRepository, reservaRepository);
+
+        Sala sala = new Sala("Lab 1", 50);
+
+        Reserva reservaEditada = new Reserva(
+                UUID.randomUUID(),
+                sala.getId(),
+                "solicitante",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 10, 12, 0),
+                        LocalDateTime.of(2026, 10, 10, 13, 0)),
+                StatusReserva.CONFIRMADA);
+
+        when(reservaRepository.findById(reservaEditada.getId())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.editarReserva(reservaEditada))
+                .isInstanceOf(ReservaNaoEncontradaException.class);
+
+        verify(reservaRepository).findById(reservaEditada.getId());
         verify(reservaRepository, never()).update(any(Reserva.class));
     }
 
