@@ -4,6 +4,8 @@ import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.repository.ReservaRepository;
 import br.ifsp.demo.repository.SalaRepository;
 import br.ifsp.demo.reserva.domain.Reserva;
+import br.ifsp.demo.reserva.domain.StatusReserva;
+import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,7 +47,13 @@ public class ReservaService {
             || reservaEditada.getPeriodo().getFim() == null) return;
 
         Optional<Reserva> reserva = reservaRepository.findById(reservaEditada.getId());
-        if (reserva.isEmpty()) return;
+        if (reserva.isEmpty()) {
+            return;
+        }
+
+        if (reserva.get().getStatus() == StatusReserva.CANCELADA) {
+            throw new ReservaCanceladaException(reservaEditada.getId());
+        }
 
         LocalDateTime inicio = reservaEditada.getPeriodo().getInicio();
         LocalDateTime fim = reservaEditada.getPeriodo().getFim();
