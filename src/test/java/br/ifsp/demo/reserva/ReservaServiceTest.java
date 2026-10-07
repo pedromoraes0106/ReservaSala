@@ -65,4 +65,22 @@ public class ReservaServiceTest {
 
         assertThat(naoConflito).isTrue();
     }
+
+    @Test
+    @DisplayName("Deve recusar caso a sala não esteja cadastrada")
+    void ValidarQuandoSalaNaoExiste(){
+        SalaRepository salaRepository = mock(SalaRepository.class);
+        ReservaRepository reservaRepository = mock(ReservaRepository.class);
+        ReservaService service = new ReservaService(salaRepository, reservaRepository);
+
+        UUID idInexistente = UUID.randomUUID();
+        LocalDate dia = LocalDate.of(2020, 1, 1);
+
+        when(salaRepository.findById(idInexistente)).thenReturn(Optional.empty());
+
+        boolean disponivel = service.verificarDisponibilidade(
+                idInexistente, dia, LocalTime.of(11, 0), LocalTime.of(13, 0));
+
+        assertThat(disponivel).isFalse();
+    }
 }
