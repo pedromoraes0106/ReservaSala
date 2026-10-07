@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
@@ -27,27 +28,27 @@ import static org.mockito.Mockito.any;
 public class ReservaServiceTest {
     @Test
     @DisplayName("Sala disponível quando não há reservas no período informado")
-    void ValidaVerificacaodeDisponibilidade(){
+    void validaVerificacaodeDisponibilidade() {
         SalaRepository salaRepository = mock(SalaRepository.class);
         ReservaRepository reservaRepository = mock(ReservaRepository.class);
         ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
-        Sala sala = new Sala("Lab 1",50);
+        Sala sala = new Sala("Lab 1", 50);
         LocalDate dia = LocalDate.of(2020, 1, 1);
 
         when(salaRepository.findById(sala.getId())).thenReturn(Optional.of(sala));
         when(reservaRepository.findConfirmadasPorSalaEDia(sala.getId(), dia))
                 .thenReturn(List.of());
 
-        boolean disponivel = service.verificarDisponibilidade(sala.getId(),dia,
-                LocalDateTime.of(dia,LocalTime.of(10,0)),LocalDateTime.of(dia,LocalTime.of(12,0)));
+        boolean disponivel = service.verificarDisponibilidade(sala.getId(), dia,
+                LocalDateTime.of(dia, LocalTime.of(10, 0)), LocalDateTime.of(dia, LocalTime.of(12, 0)));
 
         assertThat(disponivel).isTrue();
     }
 
     @Test
     @DisplayName("Deve rejeitar quando o período na sala já está alugado")
-    void ValidarConflitoDeHorario() {
+    void validarConflitoDeHorario() {
         SalaRepository salaRepository = mock(SalaRepository.class);
         ReservaRepository reservaRepository = mock(ReservaRepository.class);
         ReservaService service = new ReservaService(salaRepository, reservaRepository);
@@ -56,27 +57,27 @@ public class ReservaServiceTest {
         LocalDate dia = LocalDate.of(2020, 1, 1);
 
         Reserva reserva = new Reserva(UUID.randomUUID(), sala.getId(), "solicitante",
-                new PeriodoReserva(LocalDateTime.of(dia,LocalTime.of(10, 0)),
-                        LocalDateTime.of(dia,LocalTime.of(12, 0))), StatusReserva.CONFIRMADA);
+                new PeriodoReserva(LocalDateTime.of(dia, LocalTime.of(10, 0)),
+                        LocalDateTime.of(dia, LocalTime.of(12, 0))), StatusReserva.CONFIRMADA);
 
         when(salaRepository.findById(sala.getId())).thenReturn(Optional.of(sala));
         when(reservaRepository.findConfirmadasPorSalaEDia(sala.getId(), dia)).thenReturn(List.of(reserva));
 
         boolean conflito = service.verificarDisponibilidade(sala.getId(), dia,
-                LocalDateTime.of(dia,LocalTime.of(11, 0)),
-                LocalDateTime.of(dia,LocalTime.of(13, 0)));
+                LocalDateTime.of(dia, LocalTime.of(11, 0)),
+                LocalDateTime.of(dia, LocalTime.of(13, 0)));
 
         assertThat(conflito).isFalse();
 
         boolean naoConflito = service.verificarDisponibilidade(sala.getId(), dia,
-                LocalDateTime.of(dia,LocalTime.of(13, 0)), LocalDateTime.of(dia,LocalTime.of(14, 0)));
+                LocalDateTime.of(dia, LocalTime.of(13, 0)), LocalDateTime.of(dia, LocalTime.of(14, 0)));
 
         assertThat(naoConflito).isTrue();
     }
 
     @Test
     @DisplayName("Deve recusar caso a sala não esteja cadastrada")
-    void ValidarQuandoSalaNaoExiste(){
+    void validarQuandoSalaNaoExiste() {
         SalaRepository salaRepository = mock(SalaRepository.class);
         ReservaRepository reservaRepository = mock(ReservaRepository.class);
         ReservaService service = new ReservaService(salaRepository, reservaRepository);
@@ -87,14 +88,14 @@ public class ReservaServiceTest {
         when(salaRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
         boolean disponivel = service.verificarDisponibilidade(
-                idInexistente, dia, LocalDateTime.of(dia,LocalTime.of(11, 0)), LocalDateTime.of(dia,LocalTime.of(13, 0)));
+                idInexistente, dia, LocalDateTime.of(dia, LocalTime.of(11, 0)), LocalDateTime.of(dia, LocalTime.of(13, 0)));
 
         assertThat(disponivel).isFalse();
     }
 
     @Test
     @DisplayName("Deve validar a edição da reserva")
-    void ValidarEdicaoReserva(){
+    void validarEdicaoReserva() {
         SalaRepository salaRepository = mock(SalaRepository.class);
         ReservaRepository reservaRepository = mock(ReservaRepository.class);
         ReservaService service = new ReservaService(salaRepository, reservaRepository);
@@ -106,24 +107,24 @@ public class ReservaServiceTest {
 
         Reserva reserva = new Reserva(UUID.randomUUID(), sala.getId(),
                 "solicitante",
-                new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(12,0)),
-                LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(13,0))),
+                new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(12, 0)),
+                        LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(13, 0))),
                 StatusReserva.CONFIRMADA);
 
         when(reservaRepository.findById(reserva.getId()))
-        .thenReturn(Optional.of(reserva));
+                .thenReturn(Optional.of(reserva));
         when(reservaRepository.findConfirmadasPorSalaEDia(sala.getId(),
                 LocalDate.of(2026, 10, 10))).thenReturn(List.of(reserva));
 
         Reserva reservaEditada = new Reserva(
-            reserva.getId(),
-            sala.getId(),
-            reserva.getSolicitante(),
-            new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(14, 0)),
-                    LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(15, 0))),
-            reserva.getStatus()
+                reserva.getId(),
+                sala.getId(),
+                reserva.getSolicitante(),
+                new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(14, 0)),
+                        LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(15, 0))),
+                reserva.getStatus()
         );
-        
+
         service.editarReserva(reservaEditada);
 
         verify(reservaRepository).update(reservaEditada);
@@ -131,7 +132,7 @@ public class ReservaServiceTest {
 
     @Test
     @DisplayName("Deve Informar conflito caso o período não esteja disponivel")
-    void ValidarConflitoDeHorarioEdicao(){
+    void validarConflitoDeHorarioEdicao() {
         SalaRepository salaRepository = mock(SalaRepository.class);
         ReservaRepository reservaRepository = mock(ReservaRepository.class);
         ReservaService service = new ReservaService(salaRepository, reservaRepository);
@@ -141,13 +142,13 @@ public class ReservaServiceTest {
         when(salaRepository.findById(sala.getId())).thenReturn(Optional.of(sala));
 
         Reserva reserva = new Reserva(UUID.randomUUID(), sala.getId(),
-                "solicitante",new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(12,0)),
-                LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(13,0))),
+                "solicitante", new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(12, 0)),
+                LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(13, 0))),
                 StatusReserva.CONFIRMADA);
 
         Reserva reserva2 = new Reserva(UUID.randomUUID(), sala.getId(),
-                "solicitante",new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(14,0)),
-                LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(17,0))),
+                "solicitante", new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(14, 0)),
+                LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(17, 0))),
                 StatusReserva.CONFIRMADA);
 
         LocalDate dia = reserva.getPeriodo().getInicio().toLocalDate();
@@ -160,8 +161,8 @@ public class ReservaServiceTest {
                 reserva.getId(),
                 sala.getId(),
                 reserva.getSolicitante(),
-                new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(14, 0)),
-                        LocalDateTime.of(LocalDate.of(2026,10,10),LocalTime.of(15, 0))),
+                new PeriodoReserva(LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(14, 0)),
+                        LocalDateTime.of(LocalDate.of(2026, 10, 10), LocalTime.of(15, 0))),
                 reserva.getStatus()
         );
 
@@ -170,5 +171,42 @@ public class ReservaServiceTest {
         verify(reservaRepository, never()).update(any(Reserva.class));
     }
 
+    @Test
+    @DisplayName("deve rejeitar a edicao caso a reserva esteja cancelada")
+    void validarEdicaoReservaCancelada() {
+        ReservaRepository reservaRepository = mock(ReservaRepository.class);
+        SalaRepository salaRepository = mock(SalaRepository.class);
+        ReservaService service = new ReservaService(salaRepository, reservaRepository);
+
+        Sala sala = new Sala("Lab 1", 50);
+
+        Reserva reservaCancelada = new Reserva(
+                UUID.randomUUID(),
+                sala.getId(),
+                "solicitante",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 10, 12, 0),
+                        LocalDateTime.of(2026, 10, 10, 13, 0)),
+                StatusReserva.CANCELADA);
+
+        when(reservaRepository.findById(reservaCancelada.getId()))
+                .thenReturn(Optional.of(reservaCancelada));
+
+        Reserva reservaEditada = new Reserva(
+                reservaCancelada.getId(),
+                sala.getId(),
+                "outro solicitante",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 10, 14, 0),
+                        LocalDateTime.of(2026, 10, 10, 15, 0)),
+                StatusReserva.CONFIRMADA);
+
+        assertThatThrownBy(() -> service.editarReserva(reservaEditada))
+                .isInstanceOf(ReservaCanceladaException.class);
+
+        assertThat(reservaCancelada.getStatus()).isEqualTo(StatusReserva.CANCELADA);
+        assertThat(reservaCancelada.getSolicitante()).isEqualTo("solicitante");
+        verify(reservaRepository, never()).update(any(Reserva.class));
+    }
 
 }
