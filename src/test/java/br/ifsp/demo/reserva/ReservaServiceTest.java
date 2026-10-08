@@ -267,6 +267,38 @@ public class ReservaServiceTest {
     }
 
 
+    @Test
+    @DisplayName("deve rejeitar ao tentar remover um participante que não está na reserva")
+    void validarRemocaoParticipanteInexistente() {
+        ReservaRepository reservaRepository = mock(ReservaRepository.class);
+        SalaRepository salaRepository = mock(SalaRepository.class);
+        ReservaService service = new ReservaService(salaRepository, reservaRepository);
+
+        Participante pessoa1 = new Participante("pessoa1");
+        Participante pessoa2 = new Participante("pessoa2");
+        Participante pessoa3 = new Participante("pessoa3");
+
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "solicitante",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 10, 14, 0),
+                        LocalDateTime.of(2026, 10, 10, 15, 0)),
+                StatusReserva.CONFIRMADA,
+                new ArrayList<>(List.of(pessoa1, pessoa2))
+        );
+
+        when(reservaRepository.findById(reserva.getId())).thenReturn(Optional.of(reserva));
+
+        assertThatThrownBy(() -> service.excluirParticipante(reserva.getId(), pessoa3))
+                .isInstanceOf(ParticipanteNaoEncontradoException.class);
+
+        assertThat(reserva.getParticipantes()).containsExactly(pessoa1,pessoa2);
+
+        verify(reservaRepository,never()).update(any(Reserva.class));
+    }
+
 
 
 }
