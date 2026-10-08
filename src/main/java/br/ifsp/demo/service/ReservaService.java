@@ -75,6 +75,10 @@ public class ReservaService {
         Reserva reserva = reservaRepository.findById(idReserva)
                 .orElseThrow(() -> new ReservaNaoEncontradaException(idReserva));
 
+        if(reserva.getStatus() == StatusReserva.CANCELADA) {
+            throw new ReservaCanceladaException(idReserva);
+        }
+
         if (!reserva.getParticipantes().remove(participante)) {
             throw new ParticipanteNaoEncontradoException(participante);
         }
