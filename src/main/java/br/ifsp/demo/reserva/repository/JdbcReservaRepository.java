@@ -32,6 +32,13 @@ public class JdbcReservaRepository implements ReservaRepository {
     );
 
     @Override
+    public java.util.Optional<Reserva> buscarPorId(UUID reservaId) {
+        String sql = "SELECT * FROM reserva WHERE id = ?";
+        List<Reserva> reservas = jdbcTemplate.query(sql, ROW_MAPPER, reservaId.toString());
+        return reservas.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(reservas.getFirst());
+    }
+
+    @Override
     public List<Reserva> buscarPorSalaEPeriodo(UUID salaId, LocalDateTime inicio, LocalDateTime fim) {
         String sql = "SELECT * FROM reserva WHERE sala_id = ? AND status = 'CONFIRMADA' AND inicio < ? AND fim > ?";
         return jdbcTemplate.query(sql, ROW_MAPPER, salaId.toString(), fim.toString(), inicio.toString());

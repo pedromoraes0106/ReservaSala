@@ -45,6 +45,11 @@ public class ReservaServiceFunctionalTest {
 
         ReservaRepository reservaRepository = new ReservaRepository() {
             @Override
+            public Optional<Reserva> buscarPorId(UUID reservaId) {
+                return Optional.ofNullable(reservas.get(reservaId));
+            }
+
+            @Override
             public List<Reserva> buscarPorSalaEPeriodo(UUID salaId, LocalDateTime inicio, LocalDateTime fim) {
                 return reservas.values().stream()
                         .filter(reserva -> reserva.getSalaId().equals(salaId))

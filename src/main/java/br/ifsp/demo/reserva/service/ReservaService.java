@@ -1,5 +1,6 @@
 package br.ifsp.demo.reserva.service;
 
+import br.ifsp.demo.reserva.domain.Participante;
 import br.ifsp.demo.reserva.domain.PeriodoReserva;
 import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.Sala;
@@ -49,6 +50,21 @@ public class ReservaService {
         }
 
         Reserva reserva = new Reserva(UUID.randomUUID(), sala.getId(), solicitante, periodo, StatusReserva.CONFIRMADA);
+        return reservaRepository.salvar(reserva);
+    }
+
+    public Reserva adicionarParticipante(UUID reservaId, String nomeParticipante) {
+        if (reservaId == null) {
+            throw new IllegalArgumentException("identificador da reserva é obrigatório.");
+        }
+        if (nomeParticipante == null || nomeParticipante.isBlank()) {
+            throw new IllegalArgumentException("nome do participante é obrigatório.");
+        }
+
+        Reserva reserva = reservaRepository.buscarPorId(reservaId)
+                .orElseThrow(() -> new IllegalArgumentException("reserva não existe."));
+
+        reserva.adicionarParticipante(new Participante(nomeParticipante));
         return reservaRepository.salvar(reserva);
     }
 }
