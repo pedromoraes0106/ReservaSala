@@ -153,6 +153,32 @@ public class ReservaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveRejeitarCancelamentoDeReservaJaCancelada() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reservaCancelada = new Reserva(
+                UUID.randomUUID(),
+                sala.getId(),
+                "Pedro",
+                periodo,
+                StatusReserva.CANCELADA
+        );
+        reservas.put(reservaCancelada.getId(), reservaCancelada);
+
+        assertThatThrownBy(() -> service.cancelarReserva(reservaCancelada.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("já está cancelada");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveRejeitarParticipanteEmReservaCancelada() {
         Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
         service.getSalaRepository().salvar(sala);
