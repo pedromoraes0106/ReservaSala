@@ -1,5 +1,6 @@
 package br.ifsp.demo.reserva.service;
 
+import br.ifsp.demo.reserva.domain.Participante;
 import br.ifsp.demo.reserva.domain.PeriodoReserva;
 import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.Sala;
@@ -46,6 +47,11 @@ public class ReservaServiceTddTest {
 
         ReservaRepository reservaRepository = new ReservaRepository() {
             @Override
+            public Optional<Reserva> buscarPorId(UUID reservaId) {
+                return Optional.ofNullable(reservas.get(reservaId));
+            }
+
+            @Override
             public List<Reserva> buscarPorSalaEPeriodo(UUID salaId, LocalDateTime inicio, LocalDateTime fim) {
                 return reservas.values().stream()
                         .filter(reserva -> reserva.getSalaId().equals(salaId))
@@ -82,6 +88,26 @@ public class ReservaServiceTddTest {
         assertThat(reserva.getSolicitante()).isEqualTo("Pedro");
         assertThat(reserva.getSalaId()).isEqualTo(sala.getId());
         assertThat(reserva.getPeriodo()).isEqualTo(periodo);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveAdicionarParticipanteQuandoReservaConfirmada() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reserva = service.criarReserva(sala.getId(), "Pedro", periodo);
+
+        service.adicionarParticipante(reserva.getId(), "Maria");
+
+        assertThat(reserva.getParticipantes())
+                .containsExactly(new Participante("Maria"));
     }
 
     @Test
