@@ -1,5 +1,6 @@
 package br.ifsp.demo.service;
 
+import br.ifsp.demo.reserva.domain.Participante;
 import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.repository.ReservaRepository;
 import br.ifsp.demo.repository.SalaRepository;
@@ -67,6 +68,15 @@ public class ReservaService {
         reserva.get().setStatus(reservaEditada.getStatus());
 
         reservaRepository.update(reserva.get());
+    }
+
+    public void excluirParticipante(UUID idReserva, Participante participante) {
+        Reserva reserva = reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new ReservaNaoEncontradaException(idReserva));
+
+        reserva.getParticipantes().remove(participante);
+
+        reservaRepository.update(reserva);
     }
 }
 

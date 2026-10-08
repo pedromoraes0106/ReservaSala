@@ -1,5 +1,7 @@
 package br.ifsp.demo.reserva.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -9,13 +11,18 @@ public class Reserva {
     private  String solicitante;
     private  PeriodoReserva periodo;
     private  StatusReserva status;
+    private List<Participante> participantes;
 
     public Reserva(UUID id, UUID salaId, String solicitante, PeriodoReserva periodo, StatusReserva status) {
+        this(id, salaId, solicitante, periodo, status, new ArrayList<>());
+    }
+    public Reserva(UUID id, UUID salaId, String solicitante, PeriodoReserva periodo, StatusReserva status, List<Participante> participantes) {
         this.id = id;
         this.salaId = salaId;
         this.solicitante = solicitante;
         this.periodo = periodo;
         this.status = status;
+        this.participantes = participantes;
     }
 
     public UUID getId() {
@@ -55,15 +62,20 @@ public class Reserva {
         return status;
     }
 
+    public List<Participante> getParticipantes() {
+        return participantes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Reserva reserva)) return false;
-        return Objects.equals(id, reserva.id) && Objects.equals(salaId, reserva.salaId) && Objects.equals(solicitante, reserva.solicitante) && Objects.equals(periodo, reserva.periodo) && status == reserva.status;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reserva reserva = (Reserva) o;
+        return Objects.equals(id, reserva.id) && Objects.equals(salaId, reserva.salaId) && Objects.equals(solicitante, reserva.solicitante) && Objects.equals(periodo, reserva.periodo) && status == reserva.status && Objects.equals(participantes, reserva.participantes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, salaId, solicitante, periodo, status);
+        return Objects.hash(id, salaId, solicitante, periodo, status, participantes);
     }
 }
