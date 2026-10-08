@@ -6,6 +6,7 @@ import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
+import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
@@ -128,6 +129,32 @@ public class ReservaServiceTddTest {
         assertThatThrownBy(() -> service.adicionarParticipante(reserva.getId(), "Maria"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("já está na reserva");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarParticipanteEmReservaCancelada() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reservaCancelada = new Reserva(
+                UUID.randomUUID(),
+                sala.getId(),
+                "Pedro",
+                periodo,
+                StatusReserva.CANCELADA
+        );
+        reservas.put(reservaCancelada.getId(), reservaCancelada);
+
+        assertThatThrownBy(() -> service.adicionarParticipante(reservaCancelada.getId(), "Maria"))
+                .isInstanceOf(ReservaCanceladaException.class)
+                .hasMessageContaining("não está mais ativa");
     }
 
     @Test
