@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -237,5 +238,49 @@ public class ReservaServiceTest {
         verify(reservaRepository).findById(reservaEditada.getId());
         verify(reservaRepository, never()).update(any(Reserva.class));
     }
+
+    @Test
+    @DisplayName("deve excluir o participante existente")
+    void validarRemocaoParticipanteExistente() {
+        ReservaRepository reservaRepository = mock(ReservaRepository.class);
+        SalaRepository salaRepository = mock(SalaRepository.class);
+        ReservaService service = new ReservaService(salaRepository, reservaRepository);
+
+        Sala sala = new Sala("Lab 1", 50);
+        when(salaRepository.findById(sala.getId())).thenReturn(Optional.of(sala));
+
+
+        Participante pessoa1 = new Participante("pessoa1");
+        Participante pessoa2 = new Participante("pessoa2");
+
+        List<Participante> participantes = new ArrayList<Participante>();
+        participantes.add(pessoa1);
+        participantes.add(pessoa2);
+
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(),
+                sala.getId(),
+                "solicitante",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 10, 14, 0),
+                        LocalDateTime.of(2026, 10, 10, 15, 0)),
+                StatusReserva.CONFIRMADA,
+                participantes
+        );
+
+        when(reservaRepository.findById(reserva.getId())).thenReturn(Optional.of(reserva));
+
+        service.excluirParticipante(reserva.getId(), pessoa1.getId());
+
+        assertThat(reserva.getParticipantes())
+                .hasSize(1)
+                .containsExactly(pessoa2)
+                .doesNotContain(pessoa1);
+
+        verify(reservaRepository).save(reserva);
+    }
+
+
+
 
 }
