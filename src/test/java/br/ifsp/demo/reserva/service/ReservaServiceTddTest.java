@@ -179,6 +179,17 @@ public class ReservaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveRejeitarCancelamentoDeReservaInexistente() {
+        UUID reservaIdInexistente = UUID.randomUUID();
+
+        assertThatThrownBy(() -> service.cancelarReserva(reservaIdInexistente))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("não foi encontrada");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveRejeitarParticipanteEmReservaCancelada() {
         Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
         service.getSalaRepository().salvar(sala);
