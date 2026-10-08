@@ -1,11 +1,8 @@
 package br.ifsp.demo.reserva;
 
-import br.ifsp.demo.reserva.domain.PeriodoReserva;
-import br.ifsp.demo.reserva.domain.Reserva;
-import br.ifsp.demo.reserva.domain.Sala;
+import br.ifsp.demo.reserva.domain.*;
 import br.ifsp.demo.repository.ReservaRepository;
 import br.ifsp.demo.repository.SalaRepository;
-import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import br.ifsp.demo.service.ReservaService;
@@ -246,20 +243,13 @@ public class ReservaServiceTest {
         SalaRepository salaRepository = mock(SalaRepository.class);
         ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
-        Sala sala = new Sala("Lab 1", 50);
-        when(salaRepository.findById(sala.getId())).thenReturn(Optional.of(sala));
-
-
         Participante pessoa1 = new Participante("pessoa1");
         Participante pessoa2 = new Participante("pessoa2");
-
-        List<Participante> participantes = new ArrayList<Participante>();
-        participantes.add(pessoa1);
-        participantes.add(pessoa2);
+        List<Participante> participantes = new ArrayList<>(List.of(pessoa1, pessoa2));
 
         Reserva reserva = new Reserva(
                 UUID.randomUUID(),
-                sala.getId(),
+                UUID.randomUUID(),
                 "solicitante",
                 new PeriodoReserva(
                         LocalDateTime.of(2026, 10, 10, 14, 0),
@@ -270,14 +260,10 @@ public class ReservaServiceTest {
 
         when(reservaRepository.findById(reserva.getId())).thenReturn(Optional.of(reserva));
 
-        service.excluirParticipante(reserva.getId(), pessoa1.getId());
+        service.excluirParticipante(reserva.getId(), pessoa1);
 
-        assertThat(reserva.getParticipantes())
-                .hasSize(1)
-                .containsExactly(pessoa2)
-                .doesNotContain(pessoa1);
-
-        verify(reservaRepository).save(reserva);
+        assertThat(reserva.getParticipantes()).containsExactly(pessoa2);
+        verify(reservaRepository).update(reserva);
     }
 
 
