@@ -54,6 +54,9 @@ public class Reserva {
         if (participante == null) {
             throw new IllegalArgumentException("participante é obrigatório.");
         }
+        if (participantes.contains(participante)) {
+            throw new IllegalArgumentException("participante já está na reserva.");
+        }
         participantes.add(participante);
     }
 
