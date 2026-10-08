@@ -46,6 +46,10 @@ public class Reserva {
         return status;
     }
 
+    public Reserva cancelar() {
+        return new Reserva(this.id, this.salaId, this.solicitante, this.periodo, StatusReserva.CANCELADA, this.participantes);
+    }
+
     public List<Participante> getParticipantes() {
         return participantes;
     }

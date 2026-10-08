@@ -72,4 +72,20 @@ public class ReservaService {
         reserva.adicionarParticipante(new Participante(nomeParticipante));
         return reservaRepository.salvar(reserva);
     }
+
+    public Reserva cancelarReserva(UUID reservaId) {
+        if (reservaId == null) {
+            throw new IllegalArgumentException("identificador da reserva é obrigatório.");
+        }
+
+        Reserva reserva = reservaRepository.buscarPorId(reservaId)
+                .orElseThrow(() -> new IllegalArgumentException("reserva não foi encontrada."));
+
+        if (reserva.getStatus() == StatusReserva.CANCELADA) {
+            throw new IllegalArgumentException("reserva já está cancelada.");
+        }
+
+        Reserva cancelada = reserva.cancelar();
+        return reservaRepository.salvar(cancelada);
+    }
 }
