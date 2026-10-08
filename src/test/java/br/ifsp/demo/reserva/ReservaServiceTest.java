@@ -3,9 +3,11 @@ package br.ifsp.demo.reserva;
 import br.ifsp.demo.reserva.domain.*;
 import br.ifsp.demo.repository.ReservaRepository;
 import br.ifsp.demo.repository.SalaRepository;
+import br.ifsp.demo.reserva.exception.ParticipanteNaoEncontradoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import br.ifsp.demo.service.ReservaService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,15 +25,24 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 
 public class ReservaServiceTest {
+    private ReservaRepository reservaRepository;
+    private SalaRepository salaRepository;
+    private ReservaService service;
+
+    @BeforeEach
+    void setUp() {
+        reservaRepository = mock(ReservaRepository.class);
+        salaRepository = mock(SalaRepository.class);
+        service = new ReservaService(salaRepository, reservaRepository);
+    }
+
+
     @Test
     @DisplayName("Sala disponível quando não há reservas no período informado")
     void validaVerificacaodeDisponibilidade() {
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         Sala sala = new Sala("Lab 1", 50);
         LocalDate dia = LocalDate.of(2020, 1, 1);
@@ -49,9 +60,6 @@ public class ReservaServiceTest {
     @Test
     @DisplayName("Deve rejeitar quando o período na sala já está alugado")
     void validarConflitoDeHorario() {
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         Sala sala = new Sala("Lab 1", 50);
         LocalDate dia = LocalDate.of(2020, 1, 1);
@@ -78,9 +86,6 @@ public class ReservaServiceTest {
     @Test
     @DisplayName("Deve recusar caso a sala não esteja cadastrada")
     void validarQuandoSalaNaoExiste() {
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         UUID idInexistente = UUID.randomUUID();
         LocalDate dia = LocalDate.of(2020, 1, 1);
@@ -96,9 +101,6 @@ public class ReservaServiceTest {
     @Test
     @DisplayName("Deve validar a edição da reserva")
     void validarEdicaoReserva() {
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         Sala sala = new Sala("Lab 1", 50);
 
@@ -133,9 +135,6 @@ public class ReservaServiceTest {
     @Test
     @DisplayName("Deve Informar conflito caso o período não esteja disponivel")
     void validarConflitoDeHorarioEdicao() {
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         Sala sala = new Sala("Lab 1", 50);
 
@@ -174,9 +173,6 @@ public class ReservaServiceTest {
     @Test
     @DisplayName("deve rejeitar a edicao caso a reserva esteja cancelada")
     void validarEdicaoReservaCancelada() {
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         Sala sala = new Sala("Lab 1", 50);
 
@@ -212,9 +208,6 @@ public class ReservaServiceTest {
     @Test
     @DisplayName("deve rejeitar se a reserva nao existir")
     void validarEdicaoReservaInexistente() {
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         Sala sala = new Sala("Lab 1", 50);
 
@@ -239,9 +232,6 @@ public class ReservaServiceTest {
     @Test
     @DisplayName("deve excluir o participante existente")
     void validarRemocaoParticipanteExistente() {
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         Participante pessoa1 = new Participante("pessoa1");
         Participante pessoa2 = new Participante("pessoa2");
@@ -270,9 +260,6 @@ public class ReservaServiceTest {
     @Test
     @DisplayName("deve rejeitar ao tentar remover um participante que não está na reserva")
     void validarRemocaoParticipanteInexistente() {
-        ReservaRepository reservaRepository = mock(ReservaRepository.class);
-        SalaRepository salaRepository = mock(SalaRepository.class);
-        ReservaService service = new ReservaService(salaRepository, reservaRepository);
 
         Participante pessoa1 = new Participante("pessoa1");
         Participante pessoa2 = new Participante("pessoa2");
