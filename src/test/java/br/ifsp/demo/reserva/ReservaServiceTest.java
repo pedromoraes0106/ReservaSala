@@ -286,6 +286,33 @@ public class ReservaServiceTest {
         verify(reservaRepository,never()).update(any(Reserva.class));
     }
 
+    @Test
+    @DisplayName("deve rejeitar a remoção de participante quando a reserva está cancelada")
+    void validarRemocaoParticipanteReservaCancelada() {
+        Participante pessoa1 = new Participante("pessoa1");
+        Participante pessoa2 = new Participante("pessoa2");
+
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "solicitante",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 10, 14, 0),
+                        LocalDateTime.of(2026, 10, 10, 15, 0)),
+                StatusReserva.CANCELADA,
+                new ArrayList<>(List.of(pessoa1, pessoa2))
+        );
+
+        when(reservaRepository.findById(reserva.getId())).thenReturn(Optional.of(reserva));
+
+        assertThatThrownBy(() -> service.excluirParticipante(reserva.getId(), pessoa2))
+                .isInstanceOf(ReservaCanceladaException.class);
+
+        assertThat(reserva.getParticipantes()).containsExactly(pessoa1,pessoa2);
+
+        verify(reservaRepository,never()).update(any(Reserva.class));
+
+    }
 
 
 }
