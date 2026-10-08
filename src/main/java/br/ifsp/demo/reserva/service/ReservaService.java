@@ -6,6 +6,7 @@ import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.ConflitoDeHorarioException;
+import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
@@ -63,6 +64,10 @@ public class ReservaService {
 
         Reserva reserva = reservaRepository.buscarPorId(reservaId)
                 .orElseThrow(() -> new IllegalArgumentException("reserva não existe."));
+
+        if (reserva.getStatus() == StatusReserva.CANCELADA) {
+            throw new ReservaCanceladaException("reserva não está mais ativa.");
+        }
 
         reserva.adicionarParticipante(new Participante(nomeParticipante));
         return reservaRepository.salvar(reserva);
