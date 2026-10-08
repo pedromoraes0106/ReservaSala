@@ -12,11 +12,6 @@ public class Participante {
         this.nome = nome;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
     public UUID getId() {
         return id;
     }
@@ -31,5 +26,10 @@ public class Participante {
         if (o == null || getClass() != o.getClass()) return false;
         Participante that = (Participante) o;
         return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

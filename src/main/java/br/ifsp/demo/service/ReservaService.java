@@ -6,6 +6,7 @@ import br.ifsp.demo.repository.ReservaRepository;
 import br.ifsp.demo.repository.SalaRepository;
 import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.StatusReserva;
+import br.ifsp.demo.reserva.exception.ParticipanteNaoEncontradoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 
@@ -74,7 +75,9 @@ public class ReservaService {
         Reserva reserva = reservaRepository.findById(idReserva)
                 .orElseThrow(() -> new ReservaNaoEncontradaException(idReserva));
 
-        reserva.getParticipantes().remove(participante);
+        if (!reserva.getParticipantes().remove(participante)) {
+            throw new ParticipanteNaoEncontradoException(participante);
+        }
 
         reservaRepository.update(reserva);
     }
