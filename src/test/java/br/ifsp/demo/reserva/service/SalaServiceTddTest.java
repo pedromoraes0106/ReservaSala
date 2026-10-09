@@ -181,6 +181,13 @@ class SalaServiceTddTest {
             public Reserva salvar(Reserva reserva) {
                 return reserva;
             }
+
+            @Override
+            public List<Reserva> buscarPorSolicitante(String solicitante) {
+                return reservas.stream()
+                        .filter(reserva -> reserva.getSolicitante().equals(solicitante))
+                        .toList();
+            }
         };
     }
 }

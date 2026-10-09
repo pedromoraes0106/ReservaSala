@@ -75,6 +75,13 @@ public class ReservaServiceTddTest {
                 reservas.put(reserva.getId(), reserva);
                 return reserva;
             }
+
+            @Override
+            public List<Reserva> buscarPorSolicitante(String solicitante) {
+                return reservas.values().stream()
+                        .filter(reserva -> reserva.getSolicitante().equals(solicitante))
+                        .toList();
+            }
         };
 
         service = new ReservaService(salaRepository, reservaRepository);
@@ -255,5 +262,59 @@ public class ReservaServiceTddTest {
         assertThatThrownBy(() -> service.criarReserva(idInexistente, "Pedro", periodo))
                 .isInstanceOf(SalaNaoEncontradaException.class)
                 .hasMessageContaining("não existe");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveListarTodasAsReservasDoSolicitante() {
+        UUID salaId = UUID.randomUUID();
+
+        PeriodoReserva periodo1 = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 10, 0)
+        );
+
+        PeriodoReserva periodo2 = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 11, 14, 0),
+                LocalDateTime.of(2026, 10, 11, 15, 0)
+        );
+
+        Reserva reserva1 = new Reserva(
+                UUID.randomUUID(), salaId, "Pedro",
+                periodo1, StatusReserva.CONFIRMADA
+        );
+
+        Reserva reserva2 = new Reserva(
+                UUID.randomUUID(), salaId, "Pedro",
+                periodo2, StatusReserva.CONFIRMADA
+        );
+
+        Reserva reservaDeOutroSolicitante = new Reserva(
+                UUID.randomUUID(), salaId, "Maria",
+                periodo1, StatusReserva.CONFIRMADA
+        );
+
+        reservas.put(reserva1.getId(), reserva1);
+        reservas.put(reserva2.getId(), reserva2);
+        reservas.put(
+                reservaDeOutroSolicitante.getId(),
+                reservaDeOutroSolicitante
+        );
+
+        List<Reserva> resultado = service.listarPorSolicitante("Pedro");
+
+        assertThat(resultado)
+                .containsExactlyInAnyOrder(reserva1, reserva2);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRetornarListaVaziaQuandoSolicitanteNaoPossuiReservas() {
+        List<Reserva> resultado =
+                service.listarPorSolicitante("Carlos");
+
+        assertThat(resultado).isEmpty();
     }
 }
