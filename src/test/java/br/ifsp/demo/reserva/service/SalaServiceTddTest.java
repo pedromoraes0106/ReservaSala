@@ -87,6 +87,32 @@ class SalaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveRejeitarRemocaoDeSalaInexistente() {
+        SalaRepository salaRepository = new SalaRepository() {
+            @Override
+            public Optional<Sala> buscarPorId(UUID id) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Sala salvar(Sala sala) {
+                return sala;
+            }
+
+            @Override
+            public void remover(UUID id) {
+            }
+        };
+        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
+
+        assertThatThrownBy(() -> service.removerSala(UUID.randomUUID()))
+                .isInstanceOf(SalaNaoEncontradaException.class)
+                .hasMessageContaining("sala não foi encontrada");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveRejeitarEdicaoDeSalaInexistente() {
         SalaRepository salaRepository = new SalaRepository() {
             @Override
