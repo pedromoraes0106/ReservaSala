@@ -106,6 +106,8 @@ public class ReservaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("Deve validar a edição da reserva")
     void validarEdicaoReserva() {
 
