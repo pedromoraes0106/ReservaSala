@@ -142,6 +142,8 @@ public class ReservaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("Deve Informar conflito caso o período não esteja disponivel")
     void validarConflitoDeHorarioEdicao() {
 
