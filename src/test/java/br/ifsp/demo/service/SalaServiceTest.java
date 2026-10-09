@@ -5,6 +5,7 @@ import br.ifsp.demo.sala.domain.Sala;
 import br.ifsp.demo.sala.exception.NomeEmUsoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,6 +22,8 @@ class SalaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("deve cadastrar uma sala com sucesso")
     void validarCadastroSala(){
         Sala sala = new Sala("lab1",10);
