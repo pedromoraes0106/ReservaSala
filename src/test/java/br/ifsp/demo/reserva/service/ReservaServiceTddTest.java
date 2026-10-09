@@ -410,4 +410,33 @@ public class ReservaServiceTddTest {
 
         assertThat(resultado).containsExactly(reservaPedro);
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRetornarListaVaziaQuandoNaoHaReservasQueAtendamAoFiltro() {
+        UUID salaA = UUID.randomUUID();
+
+        Reserva reservaOutra = new Reserva(
+                UUID.randomUUID(),
+                salaA,
+                "Maria",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 15, 9, 0),
+                        LocalDateTime.of(2026, 10, 15, 10, 0)
+                ),
+                StatusReserva.CONFIRMADA
+        );
+
+        reservas.put(reservaOutra.getId(), reservaOutra);
+
+        List<Reserva> resultado = service.consultarReservas(
+                UUID.randomUUID(),
+                LocalDateTime.of(2026, 10, 20, 0, 0),
+                LocalDateTime.of(2026, 10, 20, 23, 59),
+                "Pedro"
+        );
+
+        assertThat(resultado).isEmpty();
+    }
 }
