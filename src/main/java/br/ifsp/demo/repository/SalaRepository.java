@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface SalaRepository {
     Optional<Sala> findById(UUID id);
     void save(Sala sala);
+    boolean existsByNome(String name);
 }

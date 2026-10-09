@@ -20,5 +20,6 @@ public class Sala {
 
     public UUID getId() { return id; }
     public boolean isDisponivel() { return disponivel; }
-
+    public String getNome() { return nome; }
+    public int getCapacidade() { return capacidade; }
 }
