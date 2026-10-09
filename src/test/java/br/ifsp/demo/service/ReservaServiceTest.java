@@ -306,6 +306,8 @@ public class ReservaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("deve rejeitar a remoção de participante quando a reserva está cancelada")
     void validarRemocaoParticipanteReservaCancelada() {
         Participante pessoa1 = new Participante("pessoa1");
