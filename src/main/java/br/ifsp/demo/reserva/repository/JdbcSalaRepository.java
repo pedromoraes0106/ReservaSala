@@ -37,9 +37,5 @@ public class JdbcSalaRepository implements SalaRepository {
         return sala;
     }
 
-    @Override
-    public void remover(UUID id) {
-        String sql = "DELETE FROM sala WHERE id = ?";
-        jdbcTemplate.update(sql, id.toString());
-    }
+    
 }
