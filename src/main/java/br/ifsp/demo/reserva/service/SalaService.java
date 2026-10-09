@@ -36,4 +36,19 @@ public class SalaService {
         Sala salaAtualizada = new Sala(salaExistente.getId(), novoNome, novaCapacidade);
         return salaRepository.salvar(salaAtualizada);
     }
+
+    public void removerSala(UUID salaId) {
+        Sala salaExistente = salaRepository.buscarPorId(salaId)
+                .orElseThrow(() -> new SalaNaoEncontradaException("sala não foi encontrada."));
+
+        boolean possuiReservasPendentes = !reservaRepository
+                .buscarFuturasConfirmadasPorSala(salaId, LocalDateTime.now())
+                .isEmpty();
+
+        if (possuiReservasPendentes) {
+            throw new IllegalArgumentException("sala possui reservas pendentes e não pode ser removida.");
+        }
+
+        salaRepository.remover(salaExistente.getId());
+    }
 }

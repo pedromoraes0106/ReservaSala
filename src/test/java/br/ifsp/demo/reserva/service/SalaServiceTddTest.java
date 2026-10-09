@@ -44,6 +44,11 @@ class SalaServiceTddTest {
                 salas.put(sala.getId(), sala);
                 return sala;
             }
+
+            @Override
+            public void remover(UUID id) {
+                salas.remove(id);
+            }
         };
         SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
         UUID salaId = UUID.randomUUID();
@@ -75,6 +80,11 @@ class SalaServiceTddTest {
                 salas.put(sala.getId(), sala);
                 return sala;
             }
+
+            @Override
+            public void remover(UUID id) {
+                salas.remove(id);
+            }
         };
         salaRepository.salvar(new Sala(salaId, "Sala sem reservas", 10));
         SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
@@ -97,6 +107,10 @@ class SalaServiceTddTest {
             @Override
             public Sala salvar(Sala sala) {
                 return sala;
+            }
+
+            @Override
+            public void remover(UUID id) {
             }
         };
         SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
@@ -176,6 +190,11 @@ class SalaServiceTddTest {
             public Sala salvar(Sala sala) {
                 salas.put(sala.getId(), sala);
                 return sala;
+            }
+
+            @Override
+            public void remover(UUID id) {
+                salas.remove(id);
             }
         };
     }

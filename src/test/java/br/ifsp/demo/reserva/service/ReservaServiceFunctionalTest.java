@@ -41,6 +41,11 @@ public class ReservaServiceFunctionalTest {
                 salas.put(sala.getId(), sala);
                 return sala;
             }
+
+            @Override
+            public void remover(UUID id) {
+                salas.remove(id);
+            }
         };
 
         ReservaRepository reservaRepository = new ReservaRepository() {
