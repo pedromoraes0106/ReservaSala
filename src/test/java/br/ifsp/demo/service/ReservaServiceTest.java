@@ -1,4 +1,4 @@
-package br.ifsp.demo.reserva;
+package br.ifsp.demo.service;
 
 import br.ifsp.demo.reserva.domain.*;
 import br.ifsp.demo.repository.ReservaRepository;
@@ -6,7 +6,6 @@ import br.ifsp.demo.repository.SalaRepository;
 import br.ifsp.demo.reserva.exception.ParticipanteNaoEncontradoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
-import br.ifsp.demo.service.ReservaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
