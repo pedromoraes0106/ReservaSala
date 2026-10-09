@@ -182,6 +182,8 @@ public class ReservaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("deve rejeitar a edicao caso a reserva esteja cancelada")
     void validarEdicaoReservaCancelada() {
 
