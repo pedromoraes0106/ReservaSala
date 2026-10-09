@@ -96,6 +96,37 @@ public class ReservaService {
         return reservaRepository.buscarPorSolicitante(solicitante);
     }
 
+    public Reserva confirmarCheckIn(UUID reservaId, LocalDateTime horarioAtual) {
+        if (reservaId == null) {
+            throw new IllegalArgumentException("identificador da reserva é obrigatório.");
+        }
+        if (horarioAtual == null) {
+            throw new IllegalArgumentException("horário do check-in é obrigatório.");
+        }
+
+        Reserva reserva = reservaRepository.buscarPorId(reservaId)
+                .orElseThrow(() -> new IllegalArgumentException("reserva não foi encontrada."));
+
+        if (reserva.getStatus() == StatusReserva.CANCELADA) {
+            throw new ReservaCanceladaException("reserva não está mais ativa.");
+        }
+
+        if (horarioAtual.isBefore(reserva.getPeriodo().getInicio()) || horarioAtual.isAfter(reserva.getPeriodo().getFim())) {
+            throw new IllegalArgumentException("check-in só é permitido dentro do período reservado.");
+        }
+
+        Reserva reservaEmUso = new Reserva(
+                reserva.getId(),
+                reserva.getSalaId(),
+                reserva.getSolicitante(),
+                reserva.getPeriodo(),
+                StatusReserva.EM_USO,
+                reserva.getParticipantes()
+        );
+
+        return reservaRepository.salvar(reservaEmUso);
+    }
+
     public List<Reserva> consultarReservas(UUID salaId, LocalDateTime inicio, LocalDateTime fim, String solicitante) {
         if ((inicio == null) != (fim == null)) {
             throw new IllegalArgumentException("período inválido: início e fim devem ser informados juntos.");
