@@ -275,6 +275,8 @@ public class ReservaServiceTest {
 
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("deve rejeitar ao tentar remover um participante que não está na reserva")
     void validarRemocaoParticipanteInexistente() {
 
