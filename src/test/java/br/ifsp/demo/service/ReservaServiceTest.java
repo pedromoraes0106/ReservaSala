@@ -245,6 +245,8 @@ public class ReservaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("deve excluir o participante existente")
     void validarRemocaoParticipanteExistente() {
 
