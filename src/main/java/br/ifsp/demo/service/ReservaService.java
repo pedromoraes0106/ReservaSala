@@ -55,7 +55,7 @@ public class ReservaService {
         }
 
         if (reserva.get().getStatus() == StatusReserva.CANCELADA) {
-            throw new ReservaCanceladaException(reservaEditada.getId());
+            throw new ReservaCanceladaException("A reserva " + reserva.get().getId() +" está cancelada e não pode ser editada.");
         }
 
         LocalDateTime inicio = reservaEditada.getPeriodo().getInicio();
@@ -76,7 +76,7 @@ public class ReservaService {
                 .orElseThrow(() -> new ReservaNaoEncontradaException(idReserva));
 
         if(reserva.getStatus() == StatusReserva.CANCELADA) {
-            throw new ReservaCanceladaException(idReserva);
+            throw new ReservaCanceladaException("A reserva " + idReserva +" está cancelada e não pode ser editada.");
         }
 
         if (!reserva.getParticipantes().remove(participante)) {
