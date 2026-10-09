@@ -219,6 +219,8 @@ public class ReservaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("deve rejeitar se a reserva nao existir")
     void validarEdicaoReservaInexistente() {
 
