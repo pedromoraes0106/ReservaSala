@@ -1,6 +1,6 @@
 package br.ifsp.demo.repository;
 
-import br.ifsp.demo.reserva.domain.Sala;
+import br.ifsp.demo.sala.domain.Sala;
 
 import java.util.Optional;
 import java.util.UUID;

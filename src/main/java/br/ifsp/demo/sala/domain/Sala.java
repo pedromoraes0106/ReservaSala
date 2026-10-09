@@ -1,4 +1,4 @@
-package br.ifsp.demo.reserva.domain;
+package br.ifsp.demo.sala.domain;
 
 import java.util.UUID;
 

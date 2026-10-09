@@ -1,7 +1,7 @@
 package br.ifsp.demo.service;
 
 import br.ifsp.demo.reserva.domain.Participante;
-import br.ifsp.demo.reserva.domain.Sala;
+import br.ifsp.demo.sala.domain.Sala;
 import br.ifsp.demo.repository.ReservaRepository;
 import br.ifsp.demo.repository.SalaRepository;
 import br.ifsp.demo.reserva.domain.Reserva;

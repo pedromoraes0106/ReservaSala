@@ -1,7 +1,7 @@
 package br.ifsp.demo.service;
 
 import br.ifsp.demo.repository.SalaRepository;
-import br.ifsp.demo.reserva.domain.Sala;
+import br.ifsp.demo.sala.domain.Sala;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
