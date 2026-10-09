@@ -60,6 +60,33 @@ class SalaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveRemoverSalaSemReservasFuturasConfirmadas() {
+        UUID salaId = UUID.randomUUID();
+        SalaRepository salaRepository = new SalaRepository() {
+            private final Map<UUID, Sala> salas = new HashMap<>();
+
+            @Override
+            public Optional<Sala> buscarPorId(UUID id) {
+                return Optional.ofNullable(salas.get(id));
+            }
+
+            @Override
+            public Sala salvar(Sala sala) {
+                salas.put(sala.getId(), sala);
+                return sala;
+            }
+        };
+        salaRepository.salvar(new Sala(salaId, "Sala sem reservas", 10));
+        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
+
+        service.removerSala(salaId);
+
+        assertThat(salaRepository.buscarPorId(salaId)).isEmpty();
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveRejeitarEdicaoDeSalaInexistente() {
         SalaRepository salaRepository = new SalaRepository() {
             @Override
