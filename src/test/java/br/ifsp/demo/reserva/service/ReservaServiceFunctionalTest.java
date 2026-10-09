@@ -37,14 +37,14 @@ public class ReservaServiceFunctionalTest {
             }
 
             @Override
-            public Sala salvar(Sala sala) {
-                salas.put(sala.getId(), sala);
-                return sala;
+            public void remover(UUID id) {
+                salas.remove(id);
             }
 
             @Override
-            public void remover(UUID id) {
-                salas.remove(id);
+            public Sala salvar(Sala sala) {
+                salas.put(sala.getId(), sala);
+                return sala;
             }
         };
 
