@@ -7,10 +7,10 @@ import java.util.UUID;
 
 public class Reserva {
     private final UUID id;
-    private  UUID salaId;
-    private  String solicitante;
-    private  PeriodoReserva periodo;
-    private  StatusReserva status;
+    private UUID salaId;
+    private String solicitante;
+    private PeriodoReserva periodo;
+    private StatusReserva status;
     private List<Participante> participantes;
 
     public Reserva(UUID id, UUID salaId, String solicitante, PeriodoReserva periodo, StatusReserva status) {
@@ -22,7 +22,7 @@ public class Reserva {
         this.solicitante = solicitante;
         this.periodo = periodo;
         this.status = status;
-        this.participantes = participantes;
+        this.participantes = new ArrayList<>(participantes == null ? List.of() : participantes);
     }
 
     public UUID getId() {
@@ -62,8 +62,22 @@ public class Reserva {
         return status;
     }
 
+    public Reserva cancelar() {
+        return new Reserva(this.id, this.salaId, this.solicitante, this.periodo, StatusReserva.CANCELADA, this.participantes);
+    }
+
     public List<Participante> getParticipantes() {
         return participantes;
+    }
+
+    public void adicionarParticipante(Participante participante) {
+        if (participante == null) {
+            throw new IllegalArgumentException("participante é obrigatório.");
+        }
+        if (participantes.contains(participante)) {
+            throw new IllegalArgumentException("participante já está na reserva.");
+        }
+        participantes.add(participante);
     }
 
     @Override

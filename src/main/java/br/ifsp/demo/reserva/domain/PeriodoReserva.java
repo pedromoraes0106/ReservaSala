@@ -17,14 +17,16 @@ public class PeriodoReserva {
         this.fim = fim;
     }
 
-
-
     public LocalDateTime getInicio() {
         return inicio;
     }
 
     public LocalDateTime getFim() {
         return fim;
+    }
+
+    public boolean temSobreposicaoCom(LocalDateTime inicioConsulta, LocalDateTime fimConsulta) {
+        return !inicioConsulta.isAfter(this.fim) && !fimConsulta.isBefore(this.inicio);
     }
 
     @Override

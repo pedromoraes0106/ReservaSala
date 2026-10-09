@@ -4,12 +4,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Participante {
-    private UUID id;
-    private String nome;
+    private UUID id;    
+    private final String nome;
 
-    public Participante(String nome) {
+     public Participante(String nome) {
+        if (nome == null || nome.isBlank()) {
+            throw new IllegalArgumentException("nome do participante é obrigatório.");
+        }
         this.id = UUID.randomUUID();
-        this.nome = nome;
+        this.nome = nome.trim();
     }
 
     public UUID getId() {
