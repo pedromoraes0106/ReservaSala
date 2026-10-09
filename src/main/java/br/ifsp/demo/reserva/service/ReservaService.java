@@ -6,12 +6,14 @@ import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.ConflitoDeHorarioException;
+import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.List;
 
@@ -92,5 +94,17 @@ public class ReservaService {
 
     public List<Reserva> listarPorSolicitante(String solicitante) {
         return reservaRepository.buscarPorSolicitante(solicitante);
+    }
+
+    public List<Reserva> consultarReservas(UUID salaId, LocalDateTime inicio, LocalDateTime fim, String solicitante) {
+        if ((inicio == null) != (fim == null)) {
+            throw new IllegalArgumentException("período inválido: início e fim devem ser informados juntos.");
+        }
+
+        if (inicio != null && fim != null && !fim.isAfter(inicio)) {
+            throw new PeriodoInvalidoException("período inválido: a data final deve ser posterior à data inicial.");
+        }
+
+        return reservaRepository.buscarComFiltros(salaId, inicio, fim, solicitante);
     }
 }

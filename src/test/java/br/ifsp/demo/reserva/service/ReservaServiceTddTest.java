@@ -62,6 +62,15 @@ public class ReservaServiceTddTest {
             }
 
             @Override
+            public List<Reserva> buscarComFiltros(UUID salaId, LocalDateTime inicio, LocalDateTime fim, String solicitante) {
+                return reservas.values().stream()
+                        .filter(reserva -> salaId == null || reserva.getSalaId().equals(salaId))
+                        .filter(reserva -> solicitante == null || solicitante.isBlank() || reserva.getSolicitante().equals(solicitante))
+                        .filter(reserva -> inicio == null || fim == null || reserva.getPeriodo().temSobreposicaoCom(inicio, fim))
+                        .toList();
+            }
+
+            @Override
             public List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe) {
                 return reservas.values().stream()
                         .filter(reserva -> reserva.getSalaId().equals(salaId))
