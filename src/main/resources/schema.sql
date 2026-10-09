@@ -22,3 +22,10 @@ CREATE TABLE IF NOT EXISTS reserva (
     status TEXT NOT NULL,
     FOREIGN KEY (sala_id) REFERENCES sala (id)
 );
+
+CREATE TABLE IF NOT EXISTS reserva_participante (
+    reserva_id TEXT NOT NULL,
+    nome TEXT NOT NULL,
+    PRIMARY KEY (reserva_id, nome),
+    FOREIGN KEY (reserva_id) REFERENCES reserva (id) ON DELETE CASCADE
+);

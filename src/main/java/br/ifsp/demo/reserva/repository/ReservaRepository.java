@@ -10,5 +10,6 @@ import java.util.UUID;
 public interface ReservaRepository {
     Optional<Reserva> buscarPorId(UUID reservaId);
     List<Reserva> buscarPorSalaEPeriodo(UUID salaId, LocalDateTime inicio, LocalDateTime fim);
+    List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe);
     Reserva salvar(Reserva reserva);
 }

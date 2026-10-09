@@ -59,6 +59,15 @@ public class ReservaServiceFunctionalTest {
             }
 
             @Override
+            public List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe) {
+                return reservas.values().stream()
+                        .filter(reserva -> reserva.getSalaId().equals(salaId))
+                        .filter(reserva -> reserva.getStatus() == StatusReserva.CONFIRMADA)
+                        .filter(reserva -> reserva.getPeriodo().getInicio().isAfter(aPartirDe))
+                        .toList();
+            }
+
+            @Override
             public Reserva salvar(Reserva reserva) {
                 reservas.put(reserva.getId(), reserva);
                 return reserva;
