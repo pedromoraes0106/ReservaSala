@@ -9,6 +9,9 @@ public class Sala {
     private final boolean disponivel;
 
     public Sala(String nome, int capacidade) {
+        if(capacidade < 0){
+            throw new IllegalArgumentException();
+        }
         this.id = UUID.randomUUID();
         this.nome = nome;
         this.capacidade = capacidade;
