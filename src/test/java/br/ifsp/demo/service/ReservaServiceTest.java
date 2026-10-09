@@ -89,6 +89,8 @@ public class ReservaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("Deve recusar caso a sala não esteja cadastrada")
     void validarQuandoSalaNaoExiste() {
 
