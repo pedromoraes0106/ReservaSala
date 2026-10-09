@@ -12,4 +12,5 @@ public interface ReservaRepository {
     List<Reserva> buscarPorSalaEPeriodo(UUID salaId, LocalDateTime inicio, LocalDateTime fim);
     List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe);
     Reserva salvar(Reserva reserva);
+    List<Reserva> buscarPorSolicitante(String solicitante);
 }

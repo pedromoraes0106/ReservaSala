@@ -13,6 +13,7 @@ import br.ifsp.demo.reserva.repository.SalaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.List;
 
 @Service
 public class ReservaService {
@@ -87,5 +88,9 @@ public class ReservaService {
 
         Reserva cancelada = reserva.cancelar();
         return reservaRepository.salvar(cancelada);
+    }
+
+    public List<Reserva> listarPorSolicitante(String solicitante) {
+        return reservaRepository.buscarPorSolicitante(solicitante);
     }
 }

@@ -72,6 +72,14 @@ public class ReservaServiceFunctionalTest {
                 reservas.put(reserva.getId(), reserva);
                 return reserva;
             }
+
+            @Override
+            public List<Reserva> buscarPorSolicitante(String solicitante) {
+                return reservas.values().stream()
+                        .filter(reserva -> reserva.getSolicitante().equals(solicitante))
+                        .toList();
+            }
+
         };
 
         service = new ReservaService(salaRepository, reservaRepository);

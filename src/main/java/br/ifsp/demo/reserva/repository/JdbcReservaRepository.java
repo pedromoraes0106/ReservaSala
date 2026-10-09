@@ -56,6 +56,12 @@ public class JdbcReservaRepository implements ReservaRepository {
 
     @Override
     @Transactional
+    public List<Reserva> buscarPorSolicitante(String solicitante) {
+        String sql = "SELECT * FROM reserva WHERE solicitante = ?";
+        return jdbcTemplate.query(sql, ROW_MAPPER, solicitante);
+    }
+
+    @Override
     public Reserva salvar(Reserva reserva) {
         String sql = "INSERT INTO reserva (id, sala_id, solicitante, inicio, fim, status) VALUES (?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT(id) DO UPDATE SET sala_id = excluded.sala_id, solicitante = excluded.solicitante, inicio = excluded.inicio, fim = excluded.fim, status = excluded.status";
