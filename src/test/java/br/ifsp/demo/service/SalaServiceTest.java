@@ -6,8 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 class SalaServiceTest {
     private SalaRepository salaRepository;
@@ -27,5 +27,17 @@ class SalaServiceTest {
         salaService.cadastrarSala(sala);
 
         verify(salaRepository).save(sala);
+    }
+
+    @Test
+    @DisplayName("deve rejeitar cadastro de sala com mesmo nome")
+    void naoDeveValidarSalaComMesmoNome(){
+        when(salaRepository.existsByNome("lab1")).thenReturn(true);
+        Sala sala = new Sala("lab1", 10);
+
+        assertThrows(NomeEmUsoException.class,
+                () -> salaService.cadastrarSala(sala));
+
+        verify(salaRepository, never()).save(any());
     }
 }
