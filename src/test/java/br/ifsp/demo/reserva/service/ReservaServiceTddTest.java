@@ -164,6 +164,25 @@ public class ReservaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveRejeitarCheckInForaDoPeriodoDaReserva() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reserva = service.criarReserva(sala.getId(), "Pedro", periodo);
+
+        assertThatThrownBy(() -> service.confirmarCheckIn(reserva.getId(), LocalDateTime.of(2026, 10, 10, 12, 0)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("dentro do período reservado");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveRejeitarParticipanteDuplicado() {
         Reserva reserva = new Reserva(
             UUID.randomUUID(),
