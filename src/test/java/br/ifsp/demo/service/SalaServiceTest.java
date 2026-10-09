@@ -34,6 +34,8 @@ class SalaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("deve rejeitar cadastro de sala com mesmo nome")
     void naoDeveValidarSalaComMesmoNome(){
         when(salaRepository.existsByNome("lab1")).thenReturn(true);
