@@ -61,6 +61,8 @@ public class ReservaServiceTest {
     }
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("Deve rejeitar quando o período na sala já está alugado")
     void validarConflitoDeHorario() {
 
