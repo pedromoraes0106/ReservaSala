@@ -65,33 +65,23 @@ class SalaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
-    void deveRemoverSalaSemReservasFuturasConfirmadas() {
+    void deveRejeitarRemocaoDeSalaComReservaFuturaConfirmada() {
         UUID salaId = UUID.randomUUID();
-        SalaRepository salaRepository = new SalaRepository() {
-            private final Map<UUID, Sala> salas = new HashMap<>();
+        Sala sala = new Sala(salaId, "Sala com reserva", 8);
+        Reserva reservaFutura = new Reserva(
+                UUID.randomUUID(),
+                salaId,
+                "Pedro",
+                new PeriodoReserva(LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(1).plusHours(2)),
+                StatusReserva.CONFIRMADA,
+                List.of(new Participante("Maria"))
+        );
 
-            @Override
-            public Optional<Sala> buscarPorId(UUID id) {
-                return Optional.ofNullable(salas.get(id));
-            }
+        SalaService service = new SalaService(criarSalaRepository(sala), criarReservaRepository(List.of(reservaFutura)));
 
-            @Override
-            public Sala salvar(Sala sala) {
-                salas.put(sala.getId(), sala);
-                return sala;
-            }
-
-            @Override
-            public void remover(UUID id) {
-                salas.remove(id);
-            }
-        };
-        salaRepository.salvar(new Sala(salaId, "Sala sem reservas", 10));
-        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
-
-        service.removerSala(salaId);
-
-        assertThat(salaRepository.buscarPorId(salaId)).isEmpty();
+        assertThatThrownBy(() -> service.removerSala(salaId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("reservas pendentes");
     }
 
     @Test
