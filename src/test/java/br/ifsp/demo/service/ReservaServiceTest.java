@@ -9,6 +9,7 @@ import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import br.ifsp.demo.sala.domain.Sala;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -41,6 +42,8 @@ public class ReservaServiceTest {
 
 
     @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
     @DisplayName("Sala disponível quando não há reservas no período informado")
     void validaVerificacaodeDisponibilidade() {
 
