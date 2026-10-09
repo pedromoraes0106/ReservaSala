@@ -183,6 +183,32 @@ public class ReservaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveRejeitarCheckInDeReservaCancelada() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reservaCancelada = new Reserva(
+                UUID.randomUUID(),
+                sala.getId(),
+                "Pedro",
+                periodo,
+                StatusReserva.CANCELADA
+        );
+        reservas.put(reservaCancelada.getId(), reservaCancelada);
+
+        assertThatThrownBy(() -> service.confirmarCheckIn(reservaCancelada.getId(), LocalDateTime.of(2026, 10, 10, 10, 30)))
+                .isInstanceOf(ReservaCanceladaException.class)
+                .hasMessageContaining("não está mais ativa");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveRejeitarParticipanteDuplicado() {
         Reserva reserva = new Reserva(
             UUID.randomUUID(),
