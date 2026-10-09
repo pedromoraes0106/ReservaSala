@@ -1,12 +1,24 @@
 package br.ifsp.demo.reserva.service;
 
 import br.ifsp.demo.reserva.domain.Sala;
+import br.ifsp.demo.reserva.domain.Participante;
+import br.ifsp.demo.reserva.domain.PeriodoReserva;
+import br.ifsp.demo.reserva.domain.Reserva;
+import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
+import br.ifsp.demo.reserva.repository.JdbcReservaRepository;
+import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,7 +45,7 @@ class SalaServiceTddTest {
                 return sala;
             }
         };
-        SalaService service = new SalaService(salaRepository);
+        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
         UUID salaId = UUID.randomUUID();
         salaRepository.salvar(new Sala(salaId, "Sala antiga", 8));
 
@@ -60,10 +72,115 @@ class SalaServiceTddTest {
                 return sala;
             }
         };
-        SalaService service = new SalaService(salaRepository);
+        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
 
         assertThatThrownBy(() -> service.editarSala(UUID.randomUUID(), "Sala nova", 12))
                 .isInstanceOf(SalaNaoEncontradaException.class)
                 .hasMessageContaining("sala não foi encontrada");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarReducaoDeCapacidadeAbaixoDeReservasConfirmadas() {
+        UUID salaId = UUID.randomUUID();
+        Sala sala = new Sala(salaId, "Sala atual", 8);
+        PeriodoReserva periodoFuturo = new PeriodoReserva(
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(1).plusHours(2)
+        );
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(),
+                salaId,
+                "Pedro",
+                periodoFuturo,
+                StatusReserva.CONFIRMADA,
+                List.of(new Participante("Maria"), new Participante("Joao"), new Participante("Ana"))
+        );
+        SalaRepository salaRepository = criarSalaRepository(sala);
+        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of(reserva)));
+
+        assertThatThrownBy(() -> service.editarSala(salaId, "Sala atualizada", 2))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("conflito com reservas existentes");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void devePersistirParticipantesParaConsultaDeCapacidade() {
+        SingleConnectionDataSource dataSource = new SingleConnectionDataSource("jdbc:sqlite::memory:", true);
+        try {
+            new ResourceDatabasePopulator(new ClassPathResource("schema.sql")).execute(dataSource);
+            JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+            UUID salaId = UUID.randomUUID();
+            jdbcTemplate.update("INSERT INTO sala (id, nome, capacidade) VALUES (?, ?, ?)", salaId.toString(), "Sala", 8);
+            LocalDateTime agora = LocalDateTime.now();
+            ReservaRepository reservaRepository = new JdbcReservaRepository(jdbcTemplate);
+            Reserva reserva = new Reserva(
+                    UUID.randomUUID(),
+                    salaId,
+                    "Pedro",
+                    new PeriodoReserva(agora.plusDays(1), agora.plusDays(1).plusHours(1)),
+                    StatusReserva.CONFIRMADA,
+                    List.of(new Participante("Maria"), new Participante("Joao"), new Participante("Ana"))
+            );
+
+            reservaRepository.salvar(reserva);
+
+            List<Reserva> reservasFuturas = reservaRepository.buscarFuturasConfirmadasPorSala(salaId, agora);
+            assertThat(reservasFuturas).hasSize(1);
+            assertThat(reservasFuturas.getFirst().getParticipantes()).hasSize(3);
+        } finally {
+            dataSource.destroy();
+        }
+    }
+
+    private SalaRepository criarSalaRepository(Sala salaInicial) {
+        Map<UUID, Sala> salas = new HashMap<>();
+        salas.put(salaInicial.getId(), salaInicial);
+        return new SalaRepository() {
+            @Override
+            public Optional<Sala> buscarPorId(UUID id) {
+                return Optional.ofNullable(salas.get(id));
+            }
+
+            @Override
+            public Sala salvar(Sala sala) {
+                salas.put(sala.getId(), sala);
+                return sala;
+            }
+        };
+    }
+
+    private ReservaRepository criarReservaRepository(List<Reserva> reservas) {
+        return new ReservaRepository() {
+            @Override
+            public Optional<Reserva> buscarPorId(UUID reservaId) {
+                return reservas.stream().filter(reserva -> reserva.getId().equals(reservaId)).findFirst();
+            }
+
+            @Override
+            public List<Reserva> buscarPorSalaEPeriodo(UUID salaId, LocalDateTime inicio, LocalDateTime fim) {
+                return reservas.stream()
+                        .filter(reserva -> reserva.getSalaId().equals(salaId))
+                        .filter(reserva -> reserva.getPeriodo().temSobreposicaoCom(inicio, fim))
+                        .toList();
+            }
+
+            @Override
+            public List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe) {
+                return reservas.stream()
+                        .filter(reserva -> reserva.getSalaId().equals(salaId))
+                        .filter(reserva -> reserva.getStatus() == StatusReserva.CONFIRMADA)
+                        .filter(reserva -> reserva.getPeriodo().getInicio().isAfter(aPartirDe))
+                        .toList();
+            }
+
+            @Override
+            public Reserva salvar(Reserva reserva) {
+                return reserva;
+            }
+        };
     }
 }
