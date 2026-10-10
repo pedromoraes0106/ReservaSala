@@ -74,7 +74,9 @@ public class Reserva {
         if (participante == null) {
             throw new IllegalArgumentException("participante é obrigatório.");
         }
-        if (participantes.contains(participante)) {
+        boolean participanteJaAdicionado = participantes.stream()
+            .anyMatch(existente -> existente.getNome().equals(participante.getNome()));
+        if (participanteJaAdicionado) {
             throw new IllegalArgumentException("participante já está na reserva.");
         }
         participantes.add(participante);

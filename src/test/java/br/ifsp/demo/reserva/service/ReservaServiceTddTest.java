@@ -210,23 +210,23 @@ public class ReservaServiceTddTest {
     @Tag("UnitTest")
     @Tag("TDD")
     void deveRejeitarParticipanteDuplicado() {
-        Reserva reserva = new Reserva(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "Pedro",
-            new PeriodoReserva(
-                LocalDateTime.of(2026, 10, 10, 9, 0),
-                LocalDateTime.of(2026, 10, 10, 11, 0)
-            ),
-            StatusReserva.CONFIRMADA
-        );
-        Participante participante = new Participante("Maria");
-        reserva.adicionarParticipante(participante);
+                Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+                service.getSalaRepository().salvar(sala);
 
-        assertThatThrownBy(() -> reserva.adicionarParticipante(participante))
-            .isInstanceOf(IllegalArgumentException.class)
+                PeriodoReserva periodo = new PeriodoReserva(
+                                LocalDateTime.of(2026, 10, 10, 9, 0),
+                                LocalDateTime.of(2026, 10, 10, 11, 0)
+                );
+
+                Reserva reserva = service.criarReserva(sala.getId(), "Pedro", periodo);
+                service.adicionarParticipante(reserva.getId(), "Maria");
+
+                assertThatThrownBy(() -> service.adicionarParticipante(reserva.getId(), "Maria"))
+                                .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("já está na reserva");
-        assertThat(reserva.getParticipantes()).containsExactly(participante);
+                assertThat(reserva.getParticipantes())
+                                .extracting(Participante::getNome)
+                                .containsExactly("Maria");
     }
 
     @Test
