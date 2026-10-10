@@ -9,4 +9,8 @@ public interface SalaRepository {
     Optional<Sala> buscarPorId(UUID id);
     Sala salvar(Sala sala);
     void remover(UUID id);
+
+    default boolean existePorNome(String nome) {
+        return false;
+    }
 }

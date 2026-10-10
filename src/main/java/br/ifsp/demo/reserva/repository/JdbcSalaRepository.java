@@ -38,6 +38,16 @@ public class JdbcSalaRepository implements SalaRepository {
     }
 
     @Override
+    public boolean existePorNome(String nome) {
+        Integer quantidade = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM sala WHERE nome = ?",
+                Integer.class,
+                nome
+        );
+        return quantidade != null && quantidade > 0;
+    }
+
+    @Override
     public void remover(UUID id) {
         String sql = "DELETE FROM sala WHERE id = ?";
         jdbcTemplate.update(sql, id.toString());
