@@ -7,6 +7,7 @@ import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
+import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
@@ -270,7 +271,7 @@ public class ReservaServiceTddTest {
         reservas.put(reservaCancelada.getId(), reservaCancelada);
 
         assertThatThrownBy(() -> service.cancelarReserva(reservaCancelada.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ReservaCanceladaException.class)
                 .hasMessageContaining("já está cancelada");
     }
 
@@ -281,7 +282,7 @@ public class ReservaServiceTddTest {
         UUID reservaIdInexistente = UUID.randomUUID();
 
         assertThatThrownBy(() -> service.cancelarReserva(reservaIdInexistente))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ReservaNaoEncontradaException.class)
                 .hasMessageContaining("não foi encontrada");
     }
 
