@@ -1,5 +1,7 @@
 package br.ifsp.demo.exception;
 
+import br.ifsp.demo.reserva.domain.Participante;
+import br.ifsp.demo.reserva.exception.ParticipanteNaoEncontradoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import org.junit.jupiter.api.Tag;
@@ -32,6 +34,17 @@ public class ApiExceptionHandlerTddTest {
     void deveMapearReservaInexistenteParaNaoEncontrado() {
         ResponseEntity<?> response = handler.handleReservaNaoEncontradaException(
                 new ReservaNaoEncontradaException(UUID.randomUUID())
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveMapearParticipanteInexistenteParaNaoEncontrado() {
+        ResponseEntity<?> response = handler.handleParticipanteNaoEncontradoException(
+                new ParticipanteNaoEncontradoException(new Participante("Maria"))
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);

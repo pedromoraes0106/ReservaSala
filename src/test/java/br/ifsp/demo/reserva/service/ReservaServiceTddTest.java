@@ -155,6 +155,18 @@ public class ReservaServiceTddTest {
         assertThat(disponivel).isFalse();
     }
 
+        @Test
+        @Tag("UnitTest")
+        @Tag("TDD")
+        void deveRejeitarConsultaDeDisponibilidadeParaSalaInexistente() {
+                LocalDateTime inicio = LocalDateTime.of(2026, 10, 20, 9, 0);
+
+                assertThatThrownBy(() -> service.verificarDisponibilidade(
+                                UUID.randomUUID(), inicio.toLocalDate(), inicio, inicio.plusHours(1)))
+                                .isInstanceOf(SalaNaoEncontradaException.class)
+                                .hasMessageContaining("sala não existe");
+        }
+
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
@@ -208,9 +220,41 @@ public class ReservaServiceTddTest {
                 new PeriodoReserva(inicio.plusHours(1).plusMinutes(30), inicio.plusHours(2).plusMinutes(30)),
                 StatusReserva.CONFIRMADA);
 
-        service.editarReserva(alteracoes);
+        assertThatThrownBy(() -> service.editarReserva(alteracoes))
+                .isInstanceOf(br.ifsp.demo.reserva.exception.ConflitoDeHorarioException.class)
+                .hasMessageContaining("conflito");
 
         assertThat(reserva.getPeriodo()).isEqualTo(new PeriodoReserva(inicio, inicio.plusHours(1)));
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRemoverParticipantePeloNome() {
+        Participante participante = new Participante("Maria");
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(), UUID.randomUUID(), "Pedro",
+                new PeriodoReserva(LocalDateTime.of(2026, 10, 20, 9, 0), LocalDateTime.of(2026, 10, 20, 10, 0)),
+                StatusReserva.CONFIRMADA, List.of(participante));
+        reservas.put(reserva.getId(), reserva);
+
+        service.excluirParticipante(reserva.getId(), "Maria");
+
+        assertThat(reserva.getParticipantes()).isEmpty();
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarRemocaoPeloNomeDeParticipanteInexistente() {
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(), UUID.randomUUID(), "Pedro",
+                new PeriodoReserva(LocalDateTime.of(2026, 10, 20, 9, 0), LocalDateTime.of(2026, 10, 20, 10, 0)),
+                StatusReserva.CONFIRMADA);
+        reservas.put(reserva.getId(), reserva);
+
+        assertThatThrownBy(() -> service.excluirParticipante(reserva.getId(), "Maria"))
+                .isInstanceOf(ParticipanteNaoEncontradoException.class);
     }
 
     @Test
