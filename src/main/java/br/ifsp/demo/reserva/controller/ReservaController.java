@@ -2,6 +2,7 @@ package br.ifsp.demo.reserva.controller;
 
 import br.ifsp.demo.reserva.domain.PeriodoReserva;
 import br.ifsp.demo.reserva.domain.Reserva;
+import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.service.ReservaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,31 @@ public class ReservaController {
         return ResponseEntity.ok(reservaService.consultarReservas(salaId, inicio, fim, solicitante));
     }
 
+    @GetMapping("/disponibilidade")
+    public ResponseEntity<Boolean> verificarDisponibilidade(
+            @RequestParam UUID salaId,
+            @RequestParam java.time.LocalDate dia,
+            @RequestParam LocalDateTime inicio,
+            @RequestParam LocalDateTime fim) {
+        return ResponseEntity.ok(reservaService.verificarDisponibilidade(salaId, dia, inicio, fim));
+    }
+
+    @PutMapping("/{reservaId}")
+    public ResponseEntity<Void> editar(
+            @PathVariable UUID reservaId,
+            @RequestBody EditarReservaRequest request) {
+        PeriodoReserva periodo = new PeriodoReserva(request.getInicio(), request.getFim());
+        Reserva reserva = new Reserva(
+                reservaId,
+                request.getSalaId(),
+                request.getSolicitante(),
+                periodo,
+                StatusReserva.CONFIRMADA
+        );
+        reservaService.editarReserva(reserva);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/solicitante/{solicitante}")
     public ResponseEntity<List<Reserva>> listarPorSolicitante(@PathVariable String solicitante) {
         return ResponseEntity.ok(reservaService.listarPorSolicitante(solicitante));
@@ -48,6 +74,14 @@ public class ReservaController {
             @RequestBody AdicionarParticipanteRequest request) {
         Reserva reserva = reservaService.adicionarParticipante(reservaId, request.getNome());
         return ResponseEntity.ok(reserva);
+    }
+
+    @DeleteMapping("/{reservaId}/participantes")
+    public ResponseEntity<Void> removerParticipante(
+            @PathVariable UUID reservaId,
+            @RequestParam String nome) {
+        reservaService.excluirParticipante(reservaId, nome);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{reservaId}/cancelamento")

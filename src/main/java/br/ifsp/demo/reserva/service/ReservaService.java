@@ -96,15 +96,16 @@ public class ReservaService {
     }
 
     public boolean verificarDisponibilidade(UUID salaId, LocalDate dia, LocalDateTime inicio, LocalDateTime fim) {
-        if (salaId == null || dia == null || inicio == null || fim == null || !inicio.isBefore(fim)) {
+        if (salaId == null) {
+            throw new SalaNaoEncontradaException("sala não existe: identificador informado é inválido.");
+        }
+        if (dia == null || inicio == null || fim == null || !inicio.isBefore(fim)
+                || !inicio.toLocalDate().equals(dia) || !fim.toLocalDate().equals(dia)) {
             return false;
         }
-        if (!inicio.toLocalDate().equals(dia) || !fim.toLocalDate().equals(dia)) {
-            return false;
-        }
-        if (salaRepository.buscarPorId(salaId).isEmpty()) {
-            return false;
-        }
+        salaRepository.buscarPorId(salaId)
+                .orElseThrow(() -> new SalaNaoEncontradaException(
+                        "sala não existe: identificador informado não corresponde a nenhuma sala cadastrada."));
 
         return reservaRepository.buscarPorSalaEPeriodo(salaId, inicio, fim).isEmpty();
     }
@@ -123,16 +124,17 @@ public class ReservaService {
 
         LocalDateTime inicio = reservaEditada.getPeriodo().getInicio();
         LocalDateTime fim = reservaEditada.getPeriodo().getFim();
-        if (salaRepository.buscarPorId(reservaEditada.getSalaId()).isEmpty()) {
+        UUID salaId = reservaEditada.getSalaId();
+        if (salaId == null || salaRepository.buscarPorId(salaId).isEmpty()) {
             throw new SalaNaoEncontradaException("sala não existe: identificador informado não corresponde a nenhuma sala cadastrada.");
         }
 
         boolean conflito = reservaRepository
-                .buscarPorSalaEPeriodo(reservaEditada.getSalaId(), inicio, fim)
+                .buscarPorSalaEPeriodo(salaId, inicio, fim)
                 .stream()
                 .anyMatch(outra -> !outra.getId().equals(reserva.getId()));
         if (conflito) {
-            return;
+            throw new ConflitoDeHorarioException("conflito de horário: a sala já está reservada no período solicitado.");
         }
 
         reserva.setSalaId(reservaEditada.getSalaId());
@@ -153,6 +155,26 @@ public class ReservaService {
             throw new ParticipanteNaoEncontradoException(participante);
         }
 
+        reservaRepository.salvar(reserva);
+    }
+
+    public void excluirParticipante(UUID reservaId, String nomeParticipante) {
+        if (nomeParticipante == null || nomeParticipante.isBlank()) {
+            throw new IllegalArgumentException("nome do participante é obrigatório.");
+        }
+
+        Reserva reserva = reservaRepository.buscarPorId(reservaId)
+                .orElseThrow(() -> new ReservaNaoEncontradaException(reservaId));
+
+        if (reserva.getStatus() == StatusReserva.CANCELADA) {
+            throw new ReservaCanceladaException("reserva não está mais ativa.");
+        }
+
+        Participante participante = reserva.getParticipantes().stream()
+                .filter(item -> item.getNome().equals(nomeParticipante.trim()))
+                .findFirst()
+                .orElseThrow(() -> new ParticipanteNaoEncontradoException(new Participante(nomeParticipante)));
+        reserva.getParticipantes().remove(participante);
         reservaRepository.salvar(reserva);
     }
 

@@ -1,6 +1,7 @@
 package br.ifsp.demo.exception;
 
 import br.ifsp.demo.reserva.exception.ConflitoDeHorarioException;
+import br.ifsp.demo.reserva.exception.ParticipanteNaoEncontradoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
@@ -40,6 +41,12 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = ReservaNaoEncontradaException.class)
     public ResponseEntity<?> handleReservaNaoEncontradaException(ReservaNaoEncontradaException e) {
+        ApiException apiException = new ApiException(e.getMessage(), NOT_FOUND, ZonedDateTime.now(), e.getClass().getName());
+        return new ResponseEntity<>(apiException, NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = ParticipanteNaoEncontradoException.class)
+    public ResponseEntity<?> handleParticipanteNaoEncontradoException(ParticipanteNaoEncontradoException e) {
         ApiException apiException = new ApiException(e.getMessage(), NOT_FOUND, ZonedDateTime.now(), e.getClass().getName());
         return new ResponseEntity<>(apiException, NOT_FOUND);
     }
