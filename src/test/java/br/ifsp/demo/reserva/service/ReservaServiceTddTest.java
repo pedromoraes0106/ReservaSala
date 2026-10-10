@@ -6,6 +6,7 @@ import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
+import br.ifsp.demo.reserva.exception.ParticipanteNaoEncontradoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
 import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +122,141 @@ public class ReservaServiceTddTest {
         assertThat(reserva.getSolicitante()).isEqualTo("Pedro");
         assertThat(reserva.getSalaId()).isEqualTo(sala.getId());
         assertThat(reserva.getPeriodo()).isEqualTo(periodo);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveInformarDisponibilidadeQuandoNaoHaConflito() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala disponível", 8);
+        service.getSalaRepository().salvar(sala);
+        LocalDateTime inicio = LocalDateTime.of(2026, 10, 20, 9, 0);
+        LocalDateTime fim = inicio.plusHours(1);
+
+        boolean disponivel = service.verificarDisponibilidade(
+                sala.getId(), inicio.toLocalDate(), inicio, fim);
+
+        assertThat(disponivel).isTrue();
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveIndicarIndisponibilidadeQuandoHaConflitoDeHorario() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala ocupada", 8);
+        service.getSalaRepository().salvar(sala);
+        LocalDateTime inicioReserva = LocalDateTime.of(2026, 10, 20, 9, 0);
+        Reserva reserva = service.criarReserva(
+                sala.getId(), "Pedro", new PeriodoReserva(inicioReserva, inicioReserva.plusHours(2)));
+
+        boolean disponivel = service.verificarDisponibilidade(
+                sala.getId(), inicioReserva.toLocalDate(), inicioReserva.plusHours(1), inicioReserva.plusHours(3));
+
+        assertThat(disponivel).isFalse();
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarEdicaoDeReservaInexistente() {
+        UUID reservaId = UUID.randomUUID();
+        Reserva reservaEditada = new Reserva(
+                reservaId,
+                UUID.randomUUID(),
+                "Pedro",
+                new PeriodoReserva(LocalDateTime.of(2026, 10, 20, 9, 0), LocalDateTime.of(2026, 10, 20, 10, 0)),
+                StatusReserva.CONFIRMADA
+        );
+
+        assertThatThrownBy(() -> service.editarReserva(reservaEditada))
+                .isInstanceOf(ReservaNaoEncontradaException.class);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveEditarReservaMantendoOId() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala edição", 8);
+        service.getSalaRepository().salvar(sala);
+        LocalDateTime inicioOriginal = LocalDateTime.of(2026, 10, 20, 9, 0);
+        Reserva reserva = service.criarReserva(
+                sala.getId(), "Pedro", new PeriodoReserva(inicioOriginal, inicioOriginal.plusHours(1)));
+        LocalDateTime novoInicio = inicioOriginal.plusHours(2);
+        Reserva alteracoes = new Reserva(
+                reserva.getId(), sala.getId(), "Maria",
+                new PeriodoReserva(novoInicio, novoInicio.plusHours(1)), StatusReserva.CONFIRMADA);
+
+        service.editarReserva(alteracoes);
+
+        assertThat(reserva.getId()).isEqualTo(alteracoes.getId());
+        assertThat(reserva.getSolicitante()).isEqualTo("Maria");
+        assertThat(reserva.getPeriodo()).isEqualTo(alteracoes.getPeriodo());
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveManterReservaOriginalQuandoEdicaoCriaConflito() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala conflito", 8);
+        service.getSalaRepository().salvar(sala);
+        LocalDateTime inicio = LocalDateTime.of(2026, 10, 20, 9, 0);
+        Reserva reserva = service.criarReserva(
+                sala.getId(), "Pedro", new PeriodoReserva(inicio, inicio.plusHours(1)));
+        service.criarReserva(sala.getId(), "Maria", new PeriodoReserva(inicio.plusHours(2), inicio.plusHours(3)));
+        Reserva alteracoes = new Reserva(
+                reserva.getId(), sala.getId(), "Pedro",
+                new PeriodoReserva(inicio.plusHours(1).plusMinutes(30), inicio.plusHours(2).plusMinutes(30)),
+                StatusReserva.CONFIRMADA);
+
+        service.editarReserva(alteracoes);
+
+        assertThat(reserva.getPeriodo()).isEqualTo(new PeriodoReserva(inicio, inicio.plusHours(1)));
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRemoverParticipanteExistente() {
+        Participante participante = new Participante("Maria");
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(), UUID.randomUUID(), "Pedro",
+                new PeriodoReserva(LocalDateTime.of(2026, 10, 20, 9, 0), LocalDateTime.of(2026, 10, 20, 10, 0)),
+                StatusReserva.CONFIRMADA, List.of(participante));
+        reservas.put(reserva.getId(), reserva);
+
+        service.excluirParticipante(reserva.getId(), participante);
+
+        assertThat(reserva.getParticipantes()).isEmpty();
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarRemocaoDeParticipanteInexistente() {
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(), UUID.randomUUID(), "Pedro",
+                new PeriodoReserva(LocalDateTime.of(2026, 10, 20, 9, 0), LocalDateTime.of(2026, 10, 20, 10, 0)),
+                StatusReserva.CONFIRMADA);
+        reservas.put(reserva.getId(), reserva);
+
+        assertThatThrownBy(() -> service.excluirParticipante(reserva.getId(), new Participante("Maria")))
+                .isInstanceOf(ParticipanteNaoEncontradoException.class);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarRemocaoDeParticipanteDeReservaCancelada() {
+        Participante participante = new Participante("Maria");
+        Reserva reservaCancelada = new Reserva(
+                UUID.randomUUID(), UUID.randomUUID(), "Pedro",
+                new PeriodoReserva(LocalDateTime.of(2026, 10, 20, 9, 0), LocalDateTime.of(2026, 10, 20, 10, 0)),
+                StatusReserva.CANCELADA, List.of(participante));
+        reservas.put(reservaCancelada.getId(), reservaCancelada);
+
+        assertThatThrownBy(() -> service.excluirParticipante(reservaCancelada.getId(), participante))
+                .isInstanceOf(ReservaCanceladaException.class);
+        assertThat(reservaCancelada.getParticipantes()).containsExactly(participante);
     }
 
     @Test
