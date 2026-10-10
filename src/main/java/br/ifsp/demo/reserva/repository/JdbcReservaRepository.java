@@ -83,7 +83,7 @@ public class JdbcReservaRepository implements ReservaRepository {
     @Transactional
     public List<Reserva> buscarPorSolicitante(String solicitante) {
         String sql = "SELECT * FROM reserva WHERE solicitante = ?";
-        return jdbcTemplate.query(sql, ROW_MAPPER, solicitante);
+        return carregarParticipantes(jdbcTemplate.query(sql, ROW_MAPPER, solicitante));
     }
 
     @Override
