@@ -31,6 +31,37 @@ class SalaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveCadastrarSalaComDadosValidos() {
+        Map<UUID, Sala> salas = new HashMap<>();
+        SalaRepository salaRepository = new SalaRepository() {
+            @Override
+            public Optional<Sala> buscarPorId(UUID id) {
+                return Optional.ofNullable(salas.get(id));
+            }
+
+            @Override
+            public Sala salvar(Sala sala) {
+                salas.put(sala.getId(), sala);
+                return sala;
+            }
+
+            @Override
+            public void remover(UUID id) {
+                salas.remove(id);
+            }
+        };
+        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
+
+        Sala salaCadastrada = service.cadastrarSala("Sala nova", 12);
+
+        assertThat(salaCadastrada.getNome()).isEqualTo("Sala nova");
+        assertThat(salaCadastrada.getCapacidade()).isEqualTo(12);
+        assertThat(salaRepository.buscarPorId(salaCadastrada.getId())).contains(salaCadastrada);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveAtualizarInformacoesDaSalaExistente() {
         Map<UUID, Sala> salas = new HashMap<>();
         SalaRepository salaRepository = new SalaRepository() {
