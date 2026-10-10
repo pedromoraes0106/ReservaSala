@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public class ReservaNaoEncontradaException extends RuntimeException {
     public ReservaNaoEncontradaException(UUID id) {
-        super("Reserva " + id + " inexistente e não pode ser editada.");
+        super("Reserva " + id + " não foi encontrada.");
     }
 }

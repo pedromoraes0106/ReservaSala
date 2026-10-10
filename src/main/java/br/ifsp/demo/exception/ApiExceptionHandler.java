@@ -2,6 +2,7 @@ package br.ifsp.demo.exception;
 
 import br.ifsp.demo.reserva.exception.ConflitoDeHorarioException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
+import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,12 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = SalaNaoEncontradaException.class)
     public ResponseEntity<?> handleSalaNaoEncontradaException(SalaNaoEncontradaException e) {
+        ApiException apiException = new ApiException(e.getMessage(), NOT_FOUND, ZonedDateTime.now(), e.getClass().getName());
+        return new ResponseEntity<>(apiException, NOT_FOUND);
+    }
+
+    @ExceptionHandler(value = ReservaNaoEncontradaException.class)
+    public ResponseEntity<?> handleReservaNaoEncontradaException(ReservaNaoEncontradaException e) {
         ApiException apiException = new ApiException(e.getMessage(), NOT_FOUND, ZonedDateTime.now(), e.getClass().getName());
         return new ResponseEntity<>(apiException, NOT_FOUND);
     }

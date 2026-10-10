@@ -8,6 +8,7 @@ import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.ConflitoDeHorarioException;
 import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
 import br.ifsp.demo.reserva.exception.ReservaCanceladaException;
+import br.ifsp.demo.reserva.exception.ReservaNaoEncontradaException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
@@ -82,10 +83,10 @@ public class ReservaService {
         }
 
         Reserva reserva = reservaRepository.buscarPorId(reservaId)
-                .orElseThrow(() -> new IllegalArgumentException("reserva não foi encontrada."));
+                .orElseThrow(() -> new ReservaNaoEncontradaException(reservaId));
 
         if (reserva.getStatus() == StatusReserva.CANCELADA) {
-            throw new IllegalArgumentException("reserva já está cancelada.");
+            throw new ReservaCanceladaException("reserva já está cancelada.");
         }
 
         Reserva cancelada = reserva.cancelar();
