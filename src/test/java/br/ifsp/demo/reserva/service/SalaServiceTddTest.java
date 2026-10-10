@@ -44,6 +44,11 @@ class SalaServiceTddTest {
                 salas.put(sala.getId(), sala);
                 return sala;
             }
+
+            @Override
+            public void remover(UUID id) {
+                salas.remove(id);
+            }
         };
         SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
         UUID salaId = UUID.randomUUID();
@@ -60,6 +65,54 @@ class SalaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveRejeitarRemocaoDeSalaComReservaFuturaConfirmada() {
+        UUID salaId = UUID.randomUUID();
+        Sala sala = new Sala(salaId, "Sala com reserva", 8);
+        Reserva reservaFutura = new Reserva(
+                UUID.randomUUID(),
+                salaId,
+                "Pedro",
+                new PeriodoReserva(LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(1).plusHours(2)),
+                StatusReserva.CONFIRMADA,
+                List.of(new Participante("Maria"))
+        );
+
+        SalaService service = new SalaService(criarSalaRepository(sala), criarReservaRepository(List.of(reservaFutura)));
+
+        assertThatThrownBy(() -> service.removerSala(salaId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("reservas pendentes");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarRemocaoDeSalaInexistente() {
+        SalaRepository salaRepository = new SalaRepository() {
+            @Override
+            public Optional<Sala> buscarPorId(UUID id) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Sala salvar(Sala sala) {
+                return sala;
+            }
+
+            @Override
+            public void remover(UUID id) {
+            }
+        };
+        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
+
+        assertThatThrownBy(() -> service.removerSala(UUID.randomUUID()))
+                .isInstanceOf(SalaNaoEncontradaException.class)
+                .hasMessageContaining("sala não foi encontrada");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveRejeitarEdicaoDeSalaInexistente() {
         SalaRepository salaRepository = new SalaRepository() {
             @Override
@@ -70,6 +123,10 @@ class SalaServiceTddTest {
             @Override
             public Sala salvar(Sala sala) {
                 return sala;
+            }
+
+            @Override
+            public void remover(UUID id) {
             }
         };
         SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
@@ -150,6 +207,11 @@ class SalaServiceTddTest {
                 salas.put(sala.getId(), sala);
                 return sala;
             }
+
+            @Override
+            public void remover(UUID id) {
+                salas.remove(id);
+            }
         };
     }
 
@@ -169,6 +231,15 @@ class SalaServiceTddTest {
             }
 
             @Override
+            public List<Reserva> buscarComFiltros(UUID salaId, LocalDateTime inicio, LocalDateTime fim, String solicitante) {
+                return reservas.stream()
+                        .filter(reserva -> salaId == null || reserva.getSalaId().equals(salaId))
+                        .filter(reserva -> solicitante == null || solicitante.isBlank() || reserva.getSolicitante().equals(solicitante))
+                        .filter(reserva -> inicio == null || fim == null || reserva.getPeriodo().temSobreposicaoCom(inicio, fim))
+                        .toList();
+            }
+
+            @Override
             public List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe) {
                 return reservas.stream()
                         .filter(reserva -> reserva.getSalaId().equals(salaId))
@@ -180,6 +251,13 @@ class SalaServiceTddTest {
             @Override
             public Reserva salvar(Reserva reserva) {
                 return reserva;
+            }
+
+            @Override
+            public List<Reserva> buscarPorSolicitante(String solicitante) {
+                return reservas.stream()
+                        .filter(reserva -> reserva.getSolicitante().equals(solicitante))
+                        .toList();
             }
         };
     }

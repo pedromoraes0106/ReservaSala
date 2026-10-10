@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,30 @@ public class JdbcReservaRepository implements ReservaRepository {
     }
 
     @Override
+    public List<Reserva> buscarComFiltros(UUID salaId, LocalDateTime inicio, LocalDateTime fim, String solicitante) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM reserva WHERE 1 = 1");
+        List<Object> parametros = new ArrayList<>();
+
+        if (salaId != null) {
+            sql.append(" AND sala_id = ?");
+            parametros.add(salaId.toString());
+        }
+
+        if (solicitante != null && !solicitante.isBlank()) {
+            sql.append(" AND solicitante = ?");
+            parametros.add(solicitante);
+        }
+
+        if (inicio != null && fim != null) {
+            sql.append(" AND inicio < ? AND fim > ?");
+            parametros.add(fim.toString());
+            parametros.add(inicio.toString());
+        }
+
+        return carregarParticipantes(jdbcTemplate.query(sql.toString(), ROW_MAPPER, parametros.toArray()));
+    }
+
+    @Override
     public List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe) {
         String sql = "SELECT * FROM reserva WHERE sala_id = ? AND status = 'CONFIRMADA' AND inicio > ?";
         return carregarParticipantes(jdbcTemplate.query(sql, ROW_MAPPER, salaId.toString(), aPartirDe.toString()));
@@ -56,6 +81,12 @@ public class JdbcReservaRepository implements ReservaRepository {
 
     @Override
     @Transactional
+    public List<Reserva> buscarPorSolicitante(String solicitante) {
+        String sql = "SELECT * FROM reserva WHERE solicitante = ?";
+        return jdbcTemplate.query(sql, ROW_MAPPER, solicitante);
+    }
+
+    @Override
     public Reserva salvar(Reserva reserva) {
         String sql = "INSERT INTO reserva (id, sala_id, solicitante, inicio, fim, status) VALUES (?, ?, ?, ?, ?, ?) " +
                 "ON CONFLICT(id) DO UPDATE SET sala_id = excluded.sala_id, solicitante = excluded.solicitante, inicio = excluded.inicio, fim = excluded.fim, status = excluded.status";

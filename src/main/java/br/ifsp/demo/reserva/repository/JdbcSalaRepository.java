@@ -36,4 +36,11 @@ public class JdbcSalaRepository implements SalaRepository {
         jdbcTemplate.update(sql, sala.getId().toString(), sala.getNome(), sala.getCapacidade());
         return sala;
     }
+
+    @Override
+    public void remover(UUID id) {
+        String sql = "DELETE FROM sala WHERE id = ?";
+        jdbcTemplate.update(sql, id.toString());
+    }
+
 }

@@ -37,6 +37,11 @@ public class ReservaServiceFunctionalTest {
             }
 
             @Override
+            public void remover(UUID id) {
+                salas.remove(id);
+            }
+
+            @Override
             public Sala salvar(Sala sala) {
                 salas.put(sala.getId(), sala);
                 return sala;
@@ -59,6 +64,15 @@ public class ReservaServiceFunctionalTest {
             }
 
             @Override
+            public List<Reserva> buscarComFiltros(UUID salaId, LocalDateTime inicio, LocalDateTime fim, String solicitante) {
+                return reservas.values().stream()
+                        .filter(reserva -> salaId == null || reserva.getSalaId().equals(salaId))
+                        .filter(reserva -> solicitante == null || solicitante.isBlank() || reserva.getSolicitante().equals(solicitante))
+                        .filter(reserva -> inicio == null || fim == null || reserva.getPeriodo().temSobreposicaoCom(inicio, fim))
+                        .toList();
+            }
+
+            @Override
             public List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe) {
                 return reservas.values().stream()
                         .filter(reserva -> reserva.getSalaId().equals(salaId))
@@ -72,6 +86,14 @@ public class ReservaServiceFunctionalTest {
                 reservas.put(reserva.getId(), reserva);
                 return reserva;
             }
+
+            @Override
+            public List<Reserva> buscarPorSolicitante(String solicitante) {
+                return reservas.values().stream()
+                        .filter(reserva -> reserva.getSolicitante().equals(solicitante))
+                        .toList();
+            }
+
         };
 
         service = new ReservaService(salaRepository, reservaRepository);

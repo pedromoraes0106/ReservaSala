@@ -44,6 +44,11 @@ public class ReservaServiceTddTest {
                 salas.put(sala.getId(), sala);
                 return sala;
             }
+
+            @Override
+            public void remover(UUID id) {
+                salas.remove(id);
+            }
         };
 
         ReservaRepository reservaRepository = new ReservaRepository() {
@@ -62,6 +67,15 @@ public class ReservaServiceTddTest {
             }
 
             @Override
+            public List<Reserva> buscarComFiltros(UUID salaId, LocalDateTime inicio, LocalDateTime fim, String solicitante) {
+                return reservas.values().stream()
+                        .filter(reserva -> salaId == null || reserva.getSalaId().equals(salaId))
+                        .filter(reserva -> solicitante == null || solicitante.isBlank() || reserva.getSolicitante().equals(solicitante))
+                        .filter(reserva -> inicio == null || fim == null || reserva.getPeriodo().temSobreposicaoCom(inicio, fim))
+                        .toList();
+            }
+
+            @Override
             public List<Reserva> buscarFuturasConfirmadasPorSala(UUID salaId, LocalDateTime aPartirDe) {
                 return reservas.values().stream()
                         .filter(reserva -> reserva.getSalaId().equals(salaId))
@@ -74,6 +88,13 @@ public class ReservaServiceTddTest {
             public Reserva salvar(Reserva reserva) {
                 reservas.put(reserva.getId(), reserva);
                 return reserva;
+            }
+
+            @Override
+            public List<Reserva> buscarPorSolicitante(String solicitante) {
+                return reservas.values().stream()
+                        .filter(reserva -> reserva.getSolicitante().equals(solicitante))
+                        .toList();
             }
         };
 
@@ -119,6 +140,70 @@ public class ReservaServiceTddTest {
         assertThat(reserva.getParticipantes())
             .extracting(Participante::getNome)
             .containsExactly("Maria");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveConfirmarCheckInQuandoReservaEstaDentroDoPeriodo() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reserva = service.criarReserva(sala.getId(), "Pedro", periodo);
+
+        Reserva reservaEmUso = service.confirmarCheckIn(reserva.getId(), LocalDateTime.of(2026, 10, 10, 10, 30));
+
+        assertThat(reservaEmUso.getStatus()).isEqualTo(StatusReserva.EM_USO);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarCheckInForaDoPeriodoDaReserva() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reserva = service.criarReserva(sala.getId(), "Pedro", periodo);
+
+        assertThatThrownBy(() -> service.confirmarCheckIn(reserva.getId(), LocalDateTime.of(2026, 10, 10, 12, 0)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("dentro do período reservado");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarCheckInDeReservaCancelada() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        service.getSalaRepository().salvar(sala);
+
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 11, 0)
+        );
+
+        Reserva reservaCancelada = new Reserva(
+                UUID.randomUUID(),
+                sala.getId(),
+                "Pedro",
+                periodo,
+                StatusReserva.CANCELADA
+        );
+        reservas.put(reservaCancelada.getId(), reservaCancelada);
+
+        assertThatThrownBy(() -> service.confirmarCheckIn(reservaCancelada.getId(), LocalDateTime.of(2026, 10, 10, 10, 30)))
+                .isInstanceOf(ReservaCanceladaException.class)
+                .hasMessageContaining("não está mais ativa");
     }
 
     @Test
@@ -255,5 +340,172 @@ public class ReservaServiceTddTest {
         assertThatThrownBy(() -> service.criarReserva(idInexistente, "Pedro", periodo))
                 .isInstanceOf(SalaNaoEncontradaException.class)
                 .hasMessageContaining("não existe");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveListarTodasAsReservasDoSolicitante() {
+        UUID salaId = UUID.randomUUID();
+
+        PeriodoReserva periodo1 = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 10, 9, 0),
+                LocalDateTime.of(2026, 10, 10, 10, 0)
+        );
+
+        PeriodoReserva periodo2 = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 11, 14, 0),
+                LocalDateTime.of(2026, 10, 11, 15, 0)
+        );
+
+        Reserva reserva1 = new Reserva(
+                UUID.randomUUID(), salaId, "Pedro",
+                periodo1, StatusReserva.CONFIRMADA
+        );
+
+        Reserva reserva2 = new Reserva(
+                UUID.randomUUID(), salaId, "Pedro",
+                periodo2, StatusReserva.CONFIRMADA
+        );
+
+        Reserva reservaDeOutroSolicitante = new Reserva(
+                UUID.randomUUID(), salaId, "Maria",
+                periodo1, StatusReserva.CONFIRMADA
+        );
+
+        reservas.put(reserva1.getId(), reserva1);
+        reservas.put(reserva2.getId(), reserva2);
+        reservas.put(
+                reservaDeOutroSolicitante.getId(),
+                reservaDeOutroSolicitante
+        );
+
+        List<Reserva> resultado = service.listarPorSolicitante("Pedro");
+
+        assertThat(resultado)
+                .containsExactlyInAnyOrder(reserva1, reserva2);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRetornarListaVaziaQuandoSolicitanteNaoPossuiReservas() {
+        List<Reserva> resultado =
+                service.listarPorSolicitante("Carlos");
+
+        assertThat(resultado).isEmpty();
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveConsultarReservasFiltrandoPorSalaEPeriodo() {
+        UUID salaA = UUID.randomUUID();
+        UUID salaB = UUID.randomUUID();
+
+        Reserva reservaSalaA = new Reserva(
+                UUID.randomUUID(),
+                salaA,
+                "Pedro",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 10, 9, 0),
+                        LocalDateTime.of(2026, 10, 10, 10, 0)
+                ),
+                StatusReserva.CONFIRMADA
+        );
+
+        Reserva reservaSalaB = new Reserva(
+                UUID.randomUUID(),
+                salaB,
+                "Maria",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 11, 14, 0),
+                        LocalDateTime.of(2026, 10, 11, 15, 0)
+                ),
+                StatusReserva.CONFIRMADA
+        );
+
+        reservas.put(reservaSalaA.getId(), reservaSalaA);
+        reservas.put(reservaSalaB.getId(), reservaSalaB);
+
+        List<Reserva> resultado = service.consultarReservas(
+                salaA,
+                LocalDateTime.of(2026, 10, 10, 0, 0),
+                LocalDateTime.of(2026, 10, 10, 23, 59),
+                null
+        );
+
+        assertThat(resultado).containsExactly(reservaSalaA);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveConsultarReservasFiltrandoPorSolicitante() {
+        UUID salaA = UUID.randomUUID();
+        UUID salaB = UUID.randomUUID();
+
+        Reserva reservaPedro = new Reserva(
+                UUID.randomUUID(),
+                salaA,
+                "Pedro",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 12, 9, 0),
+                        LocalDateTime.of(2026, 10, 12, 10, 0)
+                ),
+                StatusReserva.CONFIRMADA
+        );
+
+        Reserva reservaMaria = new Reserva(
+                UUID.randomUUID(),
+                salaB,
+                "Maria",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 12, 11, 0),
+                        LocalDateTime.of(2026, 10, 12, 12, 0)
+                ),
+                StatusReserva.CONFIRMADA
+        );
+
+        reservas.put(reservaPedro.getId(), reservaPedro);
+        reservas.put(reservaMaria.getId(), reservaMaria);
+
+        List<Reserva> resultado = service.consultarReservas(
+                null,
+                null,
+                null,
+                "Pedro"
+        );
+
+        assertThat(resultado).containsExactly(reservaPedro);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRetornarListaVaziaQuandoNaoHaReservasQueAtendamAoFiltro() {
+        UUID salaA = UUID.randomUUID();
+
+        Reserva reservaOutra = new Reserva(
+                UUID.randomUUID(),
+                salaA,
+                "Maria",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 15, 9, 0),
+                        LocalDateTime.of(2026, 10, 15, 10, 0)
+                ),
+                StatusReserva.CONFIRMADA
+        );
+
+        reservas.put(reservaOutra.getId(), reservaOutra);
+
+        List<Reserva> resultado = service.consultarReservas(
+                UUID.randomUUID(),
+                LocalDateTime.of(2026, 10, 20, 0, 0),
+                LocalDateTime.of(2026, 10, 20, 23, 59),
+                "Pedro"
+        );
+
+        assertThat(resultado).isEmpty();
     }
 }

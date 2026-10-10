@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface SalaRepository {
     Optional<Sala> buscarPorId(UUID id);
     Sala salvar(Sala sala);
+    void remover(UUID id);
 }
