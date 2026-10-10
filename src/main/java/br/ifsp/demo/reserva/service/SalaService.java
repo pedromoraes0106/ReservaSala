@@ -20,6 +20,11 @@ public class SalaService {
         this.reservaRepository = reservaRepository;
     }
 
+    public Sala cadastrarSala(String nome, int capacidade) {
+        Sala sala = new Sala(UUID.randomUUID(), nome, capacidade);
+        return salaRepository.salvar(sala);
+    }
+
     public Sala editarSala(UUID salaId, String novoNome, int novaCapacidade) {
         Sala salaExistente = salaRepository.buscarPorId(salaId)
                 .orElseThrow(() -> new SalaNaoEncontradaException("sala não foi encontrada."));
