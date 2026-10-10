@@ -1,7 +1,7 @@
 package br.ifsp.demo.reserva.controller;
 
 import br.ifsp.demo.reserva.domain.Sala;
-import br.ifsp.demo.reserva.service.SalaService;
+import br.ifsp.demo.sala.service.SalaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
