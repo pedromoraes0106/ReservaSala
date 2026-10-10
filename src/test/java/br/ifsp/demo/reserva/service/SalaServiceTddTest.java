@@ -9,6 +9,7 @@ import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import br.ifsp.demo.reserva.repository.JdbcReservaRepository;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
+import br.ifsp.demo.sala.service.SalaService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -49,6 +50,12 @@ public class SalaServiceTddTest {
             public void remover(UUID id) {
                 salas.remove(id);
             }
+
+            @Override
+            public boolean existePorNome(String nome) {
+                return salas.values().stream()
+                        .anyMatch(salaCadastrada -> salaCadastrada.getNome().equals(nome));
+            }
         };
         SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
 
@@ -57,6 +64,19 @@ public class SalaServiceTddTest {
         assertThat(salaCadastrada.getNome()).isEqualTo("Sala nova");
         assertThat(salaCadastrada.getCapacidade()).isEqualTo(12);
         assertThat(salaRepository.buscarPorId(salaCadastrada.getId())).contains(salaCadastrada);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
+    void deveRejeitarCadastroDeSalaComNomeDuplicado() {
+        Sala sala = new Sala(UUID.randomUUID(), "Sala existente", 8);
+        SalaRepository salaRepository = criarSalaRepository(sala);
+        SalaService service = new SalaService(salaRepository, criarReservaRepository(List.of()));
+
+        assertThatThrownBy(() -> service.cadastrarSala("Sala existente", 10))
+                .isInstanceOf(br.ifsp.demo.sala.exception.NomeEmUsoException.class)
+                .hasMessageContaining("Sala existente");
     }
 
     @Test
@@ -242,6 +262,12 @@ public class SalaServiceTddTest {
             @Override
             public void remover(UUID id) {
                 salas.remove(id);
+            }
+
+            @Override
+            public boolean existePorNome(String nome) {
+                return salas.values().stream()
+                        .anyMatch(salaCadastrada -> salaCadastrada.getNome().equals(nome));
             }
         };
     }
