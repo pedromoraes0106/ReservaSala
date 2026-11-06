@@ -347,6 +347,27 @@ public class ReservaDomainStructuralTest {
                 assertThat(reserva1.hashCode()).isNotEqualTo(reserva2.hashCode());
             }
         }
+
+        @Nested
+        class ParticipanteHashCode {
+
+            @Test
+            void deveTerMesmoHashQuandoIdForIgual() {
+                UUID id = UUID.randomUUID();
+                Participante participante1 = new Participante(id, "Bruno");
+                Participante participante2 = new Participante(id, "Carla");
+
+                assertThat(participante1.hashCode()).isEqualTo(participante2.hashCode());
+            }
+
+            @Test
+            void deveTerHashDiferenteQuandoIdForDiferente() {
+                Participante participante1 = new Participante("Bruno");
+                Participante participante2 = new Participante("Bruno");
+
+                assertThat(participante1.hashCode()).isNotEqualTo(participante2.hashCode());
+            }
+        }
     }
 
     @Test
