@@ -230,6 +230,49 @@ public class ReservaDomainStructuralTest {
             }
         }
 
+        @Nested
+        class ParticipanteEquals {
+
+            @Test
+            void deveSerIgualQuandoForAMesmaInstancia() {
+                Participante participante = new Participante("Bruno");
+
+                assertThat(participante.equals(participante)).isTrue();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoForNulo() {
+                Participante participante = new Participante("Bruno");
+
+                assertThat(participante.equals(null)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoForDeOutroTipo() {
+                Participante participante = new Participante("Bruno");
+
+                assertThat(participante.equals("Bruno")).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoIdForDiferente() {
+                Participante participante1 = new Participante("Bruno");
+                Participante participante2 = new Participante("Bruno");
+
+                assertThat(participante1.equals(participante2)).isFalse();
+            }
+
+            @Test
+            void deveSerIgualQuandoIdForIgual() {
+                UUID uuid = UUID.randomUUID();
+                Participante participante1 = new Participante(uuid,"Bruno");
+                Participante participante2 = new Participante(uuid,"Carla");
+
+                assertThat(participante1.equals(participante2)).isTrue();
+            }
+        }
+
+
     }
 
     @Nested
