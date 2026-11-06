@@ -1,7 +1,9 @@
 package br.ifsp.demo.reserva.service;
 
 import br.ifsp.demo.reserva.domain.PeriodoReserva;
+import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.Sala;
+import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -216,6 +218,23 @@ public class ReservaDomainStructuralTest {
         assertThatThrownBy(() -> new PeriodoReserva(LocalDateTime.of(2026, 11, 10, 10, 0),null))
                 .isInstanceOf(PeriodoInvalidoException.class)
                 .hasMessageContaining("período inválido");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveAlterarStatusDaReserva() {
+        LocalDateTime inicio = LocalDateTime.of(2026, 10, 20, 9, 0);
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "Pedro",
+                new PeriodoReserva(inicio, inicio.plusHours(1)),
+                StatusReserva.CONFIRMADA);
+
+        reserva.setStatus(StatusReserva.CANCELADA);
+
+        assertThat(reserva.getStatus()).isEqualTo(StatusReserva.CANCELADA);
     }
 
 }
