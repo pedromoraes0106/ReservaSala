@@ -1,15 +1,13 @@
 package br.ifsp.demo.reserva.service;
 
-import br.ifsp.demo.reserva.domain.PeriodoReserva;
-import br.ifsp.demo.reserva.domain.Reserva;
-import br.ifsp.demo.reserva.domain.Sala;
-import br.ifsp.demo.reserva.domain.StatusReserva;
+import br.ifsp.demo.reserva.domain.*;
 import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -151,6 +149,87 @@ public class ReservaDomainStructuralTest {
 
         }
 
+        @Nested
+        class ReservaEquals {
+            private final UUID id = UUID.randomUUID();
+            private final UUID salaId = UUID.randomUUID();
+            private final PeriodoReserva periodo = new PeriodoReserva(
+                    LocalDateTime.of(2026, 11, 10, 8, 0),
+                    LocalDateTime.of(2026, 11, 10, 10, 0));
+            private final List<Participante> participantes = List.of(new Participante("Bruno"));
+
+            private Reserva reservaBase() {
+                return new Reserva(id, salaId, "Ana", periodo, StatusReserva.CONFIRMADA, participantes);
+            }
+
+            @Test
+            void deveSerIgualQuandoForAMesmaInstancia() {
+                Reserva reserva = reservaBase();
+
+                assertThat(reserva.equals(reserva)).isTrue();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoForNulo() {
+                assertThat(reservaBase().equals(null)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoForDeOutroTipo() {
+                assertThat(reservaBase().equals("reserva")).isFalse();
+            }
+
+            @Test
+            void deveSerIgualQuandoTodosOsCamposForemIguais() {
+                assertThat(reservaBase().equals(reservaBase())).isTrue();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoIdForDiferente() {
+                Reserva outra = new Reserva(UUID.randomUUID(), salaId, "Ana", periodo, StatusReserva.CONFIRMADA, participantes);
+
+                assertThat(reservaBase().equals(outra)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoSalaIdForDiferente() {
+                Reserva outra = new Reserva(id, UUID.randomUUID(), "Ana", periodo, StatusReserva.CONFIRMADA, participantes);
+
+                assertThat(reservaBase().equals(outra)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoSolicitanteForDiferente() {
+                Reserva outra = new Reserva(id, salaId, "Pedro", periodo, StatusReserva.CONFIRMADA, participantes);
+
+                assertThat(reservaBase().equals(outra)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoPeriodoForDiferente() {
+                PeriodoReserva outroPeriodo = new PeriodoReserva(
+                        LocalDateTime.of(2026, 11, 11, 8, 0),
+                        LocalDateTime.of(2026, 11, 11, 10, 0));
+                Reserva outra = new Reserva(id, salaId, "Ana", outroPeriodo, StatusReserva.CONFIRMADA, participantes);
+
+                assertThat(reservaBase().equals(outra)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoStatusForDiferente() {
+                Reserva outra = new Reserva(id, salaId, "Ana", periodo, StatusReserva.CANCELADA, participantes);
+
+                assertThat(reservaBase().equals(outra)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoParticipantesForemDiferentes() {
+                Reserva outra = new Reserva(id, salaId, "Ana", periodo, StatusReserva.CONFIRMADA, List.of());
+
+                assertThat(reservaBase().equals(outra)).isFalse();
+            }
+        }
+
     }
 
     @Nested
@@ -251,6 +330,8 @@ public class ReservaDomainStructuralTest {
 
         assertThatThrownBy(()->reserva.adicionarParticipante(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("participante é obrigatório.");
     }
+
+
 
 
 }
