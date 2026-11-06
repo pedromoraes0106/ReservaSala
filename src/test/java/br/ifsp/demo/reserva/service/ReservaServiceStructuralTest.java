@@ -111,5 +111,12 @@ public class ReservaServiceStructuralTest {
     void deveLancarIllegalArgumentExceptionSeIdDaSalaForNulo(){
         assertThatThrownBy(()->new Sala(null,"teste",10)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("identificador da sala é obrigatório.");
     }
-    
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveLancarIllegalArgumentExceptionSeNomeDaSalaForNulo(){
+        assertThatThrownBy(()->new Sala(UUID.randomUUID(),null,10)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("nome da sala é obrigatório.");
+    }
+
 }
