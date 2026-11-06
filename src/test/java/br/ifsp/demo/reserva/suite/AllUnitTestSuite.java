@@ -3,6 +3,7 @@ package br.ifsp.demo.reserva.suite;
 import br.ifsp.demo.exception.ApiExceptionHandlerTddTest;
 import br.ifsp.demo.sala.domain.SalaTest;
 import br.ifsp.demo.reserva.service.ReservaServiceFunctionalTest;
+import br.ifsp.demo.reserva.controller.RestControllerStructuralTest;
 import br.ifsp.demo.reserva.service.ReservaServiceStructuralTest;
 import br.ifsp.demo.reserva.service.ReservaServiceTddTest;
 import br.ifsp.demo.reserva.service.SalaServiceTddTest;
@@ -16,6 +17,7 @@ import org.junit.platform.suite.api.Suite;
 	ApiExceptionHandlerTddTest.class,
 	ReservaServiceFunctionalTest.class,
 	ReservaServiceStructuralTest.class,
+	RestControllerStructuralTest.class,
 	SalaTest.class
 })
 public class AllUnitTestSuite {
