@@ -188,6 +188,30 @@ public class ReservaServiceStructuralTest {
         }
     }
 
+    @Nested
+    @Tag("UnitTest")
+    @Tag("Structural")
+    class HashCode {
+
+        @Test
+        void deveTerMesmoHashQuandoSalasForemIguais() {
+            UUID uuid = UUID.randomUUID();
+            Sala sala1 = new Sala(uuid, "lab1", 10);
+            Sala sala2 = new Sala(uuid, "lab1", 10);
+
+            assertThat(sala1.hashCode()).isEqualTo(sala2.hashCode());
+        }
+
+        @Test
+        void deveTerHashDiferenteQuandoSalasForemDiferentes() {
+
+            Sala sala1 = new Sala(UUID.randomUUID(), "lab1", 10);
+            Sala sala2 = new Sala(UUID.randomUUID(), "lab2", 20);
+
+            assertThat(sala1.hashCode()).isNotEqualTo(sala2.hashCode());
+        }
+    }
+
 
 
 }
