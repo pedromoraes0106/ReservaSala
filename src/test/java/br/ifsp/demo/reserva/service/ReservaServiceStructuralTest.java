@@ -135,52 +135,108 @@ public class ReservaServiceStructuralTest {
     @Tag("Structural")
     class Equals{
 
-        @Test
-        void deveSerIgualQuandoForAMesmaInstancia() {
-            Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
+        @Nested
+        class SalaEquals{
+            @Test
+            void deveSerIgualQuandoForAMesmaInstancia() {
+                Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
 
-            assertThat(sala.equals(sala)).isTrue();
+                assertThat(sala.equals(sala)).isTrue();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoForNulo() {
+                Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
+
+                assertThat(sala.equals(null)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoForDeOutroTipo() {
+                Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
+
+                assertThat(sala.equals("lab1")).isFalse();
+            }
+
+            @Test
+            void deveSerIgualQuandoIdECapacidadeForemIguais() {
+                UUID salaId = UUID.randomUUID();
+                Sala sala1 = new Sala(salaId, "lab1", 10);
+                Sala sala2 = new Sala(salaId, "lab1", 10);
+
+                assertThat(sala1.equals(sala2)).isTrue();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoCapacidadeForDiferente() {
+                UUID salaId = UUID.randomUUID();
+                Sala sala1 = new Sala(salaId, "lab1", 10);
+                Sala sala2 = new Sala(salaId, "lab1", 20);
+
+                assertThat(sala1.equals(sala2)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoIdForDiferente() {
+                Sala sala1 = new Sala(UUID.randomUUID(), "lab1", 10);
+                Sala sala2 = new Sala(UUID.randomUUID(), "lab1", 10);
+
+                assertThat(sala1.equals(sala2)).isFalse();
+            }
         }
 
-        @Test
-        void naoDeveSerIgualQuandoForNulo() {
-            Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
+        @Nested
+        class PeriodoReservaEquals{
+            private static final LocalDateTime INICIO = LocalDateTime.of(2026, 11, 10, 8, 0);
+            private static final LocalDateTime FIM = LocalDateTime.of(2026, 11, 10, 10, 0);
 
-            assertThat(sala.equals(null)).isFalse();
+            @Test
+            void deveSerIgualQuandoForAMesmaInstancia() {
+                PeriodoReserva periodo = new PeriodoReserva(INICIO, FIM);
+
+                assertThat(periodo.equals(periodo)).isTrue();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoForNulo() {
+                PeriodoReserva periodo = new PeriodoReserva(INICIO, FIM);
+
+                assertThat(periodo.equals(null)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoForDeOutroTipo() {
+                PeriodoReserva periodo = new PeriodoReserva(INICIO, FIM);
+
+                assertThat(periodo.equals("periodo")).isFalse();
+            }
+
+            @Test
+            void deveSerIgualQuandoInicioEFimForemIguais() {
+                PeriodoReserva periodo1 = new PeriodoReserva(INICIO, FIM);
+                PeriodoReserva periodo2 = new PeriodoReserva(INICIO, FIM);
+
+                assertThat(periodo1.equals(periodo2)).isTrue();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoInicioForDiferente() {
+                PeriodoReserva periodo1 = new PeriodoReserva(INICIO, FIM);
+                PeriodoReserva periodo2 = new PeriodoReserva(INICIO.minusHours(1), FIM);
+
+                assertThat(periodo1.equals(periodo2)).isFalse();
+            }
+
+            @Test
+            void naoDeveSerIgualQuandoFimForDiferente() {
+                PeriodoReserva periodo1 = new PeriodoReserva(INICIO, FIM);
+                PeriodoReserva periodo2 = new PeriodoReserva(INICIO, FIM.plusHours(1));
+
+                assertThat(periodo1.equals(periodo2)).isFalse();
+            }
+
         }
 
-        @Test
-        void naoDeveSerIgualQuandoForDeOutroTipo() {
-            Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
-
-            assertThat(sala.equals("lab1")).isFalse();
-        }
-
-        @Test
-        void deveSerIgualQuandoIdECapacidadeForemIguais() {
-            UUID salaId = UUID.randomUUID();
-            Sala sala1 = new Sala(salaId, "lab1", 10);
-            Sala sala2 = new Sala(salaId, "lab1", 10);
-
-            assertThat(sala1.equals(sala2)).isTrue();
-        }
-
-        @Test
-        void naoDeveSerIgualQuandoCapacidadeForDiferente() {
-            UUID salaId = UUID.randomUUID();
-            Sala sala1 = new Sala(salaId, "lab1", 10);
-            Sala sala2 = new Sala(salaId, "lab1", 20);
-
-            assertThat(sala1.equals(sala2)).isFalse();
-        }
-
-        @Test
-        void naoDeveSerIgualQuandoIdForDiferente() {
-            Sala sala1 = new Sala(UUID.randomUUID(), "lab1", 10);
-            Sala sala2 = new Sala(UUID.randomUUID(), "lab1", 10);
-
-            assertThat(sala1.equals(sala2)).isFalse();
-        }
     }
 
     @Nested
@@ -206,7 +262,6 @@ public class ReservaServiceStructuralTest {
             assertThat(sala1.hashCode()).isNotEqualTo(sala2.hashCode());
         }
     }
-
 
 
 }
