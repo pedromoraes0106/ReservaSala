@@ -98,10 +98,6 @@ public class ReservaServiceStructuralTest {
         return new ReservaService(salaRepository, reservaRepository);
     }
 
-    private SalaService criarSalaService(SalaRepository salaRepository, ReservaRepository reservaRepository) {
-        return new SalaService(salaRepository, reservaRepository);
-    }
-
     private PeriodoReserva periodoValido() {
         LocalDateTime inicio = LocalDateTime.of(2026, 11, 6, 9, 0);
         return new PeriodoReserva(inicio, inicio.plusHours(1));
@@ -211,7 +207,6 @@ public class ReservaServiceStructuralTest {
             assertThat(sala1.hashCode()).isNotEqualTo(sala2.hashCode());
         }
     }
-
 
 
 }
