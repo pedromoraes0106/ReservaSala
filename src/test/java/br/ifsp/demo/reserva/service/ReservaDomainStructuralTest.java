@@ -237,4 +237,19 @@ public class ReservaDomainStructuralTest {
         assertThat(reserva.getStatus()).isEqualTo(StatusReserva.CANCELADA);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveLancarIllegalArgumentExceptionSeIdParticipanteForNuloAoAdicionar(){
+        LocalDateTime inicio = LocalDateTime.of(2026, 10, 20, 9, 0);
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "Pedro",
+                new PeriodoReserva(inicio, inicio.plusHours(1)),
+                StatusReserva.CONFIRMADA);
+
+        assertThatThrownBy(()->reserva.adicionarParticipante(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("participante é obrigatório.");
+    }
+
 }
