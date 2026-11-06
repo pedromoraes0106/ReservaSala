@@ -451,6 +451,16 @@ public class ReservaDomainStructuralTest {
         assertThatThrownBy(()->new Participante("")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("nome do participante é obrigatório.");
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveRetornarOIdInformadoNoConstrutor() {
+        UUID id = UUID.randomUUID();
+        Participante participante = new Participante(id, "Bruno");
+
+        assertThat(participante.getId()).isEqualTo(id);
+    }
+
 
 
 
