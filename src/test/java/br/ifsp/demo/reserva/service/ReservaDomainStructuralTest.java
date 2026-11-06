@@ -252,4 +252,5 @@ public class ReservaDomainStructuralTest {
         assertThatThrownBy(()->reserva.adicionarParticipante(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("participante é obrigatório.");
     }
 
+
 }
