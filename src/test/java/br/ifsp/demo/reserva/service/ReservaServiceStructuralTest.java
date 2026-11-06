@@ -298,5 +298,14 @@ public class ReservaServiceStructuralTest {
                 .hasMessageContaining("período inválido");
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveLancarPeriodoInvalidoExceptionQuandoFimForNulo() {
+        assertThatThrownBy(() -> new PeriodoReserva(LocalDateTime.of(2026, 11, 10, 10, 0),null))
+                .isInstanceOf(PeriodoInvalidoException.class)
+                .hasMessageContaining("período inválido");
+    }
+
 
 }
