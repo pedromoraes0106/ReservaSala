@@ -9,6 +9,7 @@ import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
 import br.ifsp.demo.sala.service.SalaService;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -132,5 +134,60 @@ public class ReservaServiceStructuralTest {
     void deveLancarIllegalArgumentExceptionSeCapacidadeDaForInvalida(){
         assertThatThrownBy(()->new Sala(UUID.randomUUID(),"teste",-1)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("capacidade da sala deve ser maior que zero.");
     }
+
+    @Nested
+    @Tag("UnitTest")
+    @Tag("Structural")
+    class Equals{
+
+        @Test
+        void deveSerIgualQuandoForAMesmaInstancia() {
+            Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
+
+            assertThat(sala.equals(sala)).isTrue();
+        }
+
+        @Test
+        void naoDeveSerIgualQuandoForNulo() {
+            Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
+
+            assertThat(sala.equals(null)).isFalse();
+        }
+
+        @Test
+        void naoDeveSerIgualQuandoForDeOutroTipo() {
+            Sala sala = new Sala(UUID.randomUUID(), "lab1", 10);
+
+            assertThat(sala.equals("lab1")).isFalse();
+        }
+
+        @Test
+        void deveSerIgualQuandoIdECapacidadeForemIguais() {
+            UUID salaId = UUID.randomUUID();
+            Sala sala1 = new Sala(salaId, "lab1", 10);
+            Sala sala2 = new Sala(salaId, "lab1", 10);
+
+            assertThat(sala1.equals(sala2)).isTrue();
+        }
+
+        @Test
+        void naoDeveSerIgualQuandoCapacidadeForDiferente() {
+            UUID salaId = UUID.randomUUID();
+            Sala sala1 = new Sala(salaId, "lab1", 10);
+            Sala sala2 = new Sala(salaId, "lab1", 20);
+
+            assertThat(sala1.equals(sala2)).isFalse();
+        }
+
+        @Test
+        void naoDeveSerIgualQuandoIdForDiferente() {
+            Sala sala1 = new Sala(UUID.randomUUID(), "lab1", 10);
+            Sala sala2 = new Sala(UUID.randomUUID(), "lab1", 10);
+
+            assertThat(sala1.equals(sala2)).isFalse();
+        }
+    }
+
+
 
 }
