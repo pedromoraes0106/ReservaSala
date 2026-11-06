@@ -7,13 +7,18 @@ public class Participante {
     private UUID id;    
     private final String nome;
 
-     public Participante(String nome) {
+    public Participante(UUID id, String nome) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("nome do participante é obrigatório.");
         }
-        this.id = UUID.randomUUID();
+        this.id = id;
         this.nome = nome.trim();
     }
+
+    public Participante(String nome) {
+        this(UUID.randomUUID(), nome);
+    }
+
 
     public UUID getId() {
         return id;
