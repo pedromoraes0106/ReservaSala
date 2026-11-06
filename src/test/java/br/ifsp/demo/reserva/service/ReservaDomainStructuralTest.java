@@ -279,6 +279,31 @@ public class ReservaDomainStructuralTest {
                 assertThat(periodo1.hashCode()).isNotEqualTo(periodo2.hashCode());
             }
         }
+
+        @Nested
+        class ReservaHashCode {
+            private final UUID id = UUID.randomUUID();
+            private final UUID salaId = UUID.randomUUID();
+            private final PeriodoReserva periodo = new PeriodoReserva(
+                    LocalDateTime.of(2026, 11, 10, 8, 0),
+                    LocalDateTime.of(2026, 11, 10, 10, 0));
+
+            @Test
+            void deveTerMesmoHashQuandoReservasForemIguais() {
+                Reserva reserva1 = new Reserva(id, salaId, "Ana", periodo, StatusReserva.CONFIRMADA);
+                Reserva reserva2 = new Reserva(id, salaId, "Ana", periodo, StatusReserva.CONFIRMADA);
+
+                assertThat(reserva1.hashCode()).isEqualTo(reserva2.hashCode());
+            }
+
+            @Test
+            void deveTerHashDiferenteQuandoReservasForemDiferentes() {
+                Reserva reserva1 = new Reserva(id, salaId, "Ana", periodo, StatusReserva.CONFIRMADA);
+                Reserva reserva2 = new Reserva(UUID.randomUUID(), salaId, "Pedro", periodo, StatusReserva.CANCELADA);
+
+                assertThat(reserva1.hashCode()).isNotEqualTo(reserva2.hashCode());
+            }
+        }
     }
 
     @Test
