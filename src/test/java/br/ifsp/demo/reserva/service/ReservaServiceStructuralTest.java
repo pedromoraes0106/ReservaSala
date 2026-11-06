@@ -5,6 +5,7 @@ import br.ifsp.demo.reserva.domain.Reserva;
 import br.ifsp.demo.reserva.domain.Sala;
 import br.ifsp.demo.reserva.domain.StatusReserva;
 import br.ifsp.demo.reserva.exception.ConflitoDeHorarioException;
+import br.ifsp.demo.reserva.exception.PeriodoInvalidoException;
 import br.ifsp.demo.reserva.exception.SalaNaoEncontradaException;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
@@ -286,6 +287,15 @@ public class ReservaServiceStructuralTest {
                 assertThat(periodo1.hashCode()).isNotEqualTo(periodo2.hashCode());
             }
         }
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveLancarPeriodoInvalidoExceptionQuandoInicioForNulo() {
+        assertThatThrownBy(() -> new PeriodoReserva(null, LocalDateTime.of(2026, 11, 10, 10, 0)))
+                .isInstanceOf(PeriodoInvalidoException.class)
+                .hasMessageContaining("período inválido");
     }
 
 
