@@ -356,6 +356,23 @@ public class ReservaDomainStructuralTest {
         assertThatThrownBy(()->reserva.adicionarParticipante(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("participante é obrigatório.");
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveCriarListaVaziaQuandoParticipantesForNulo() {
+        Reserva reserva = new Reserva(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "Ana",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 11, 10, 8, 0),
+                        LocalDateTime.of(2026, 11, 10, 10, 0)),
+                StatusReserva.CONFIRMADA,
+                null);
+
+        assertThat(reserva.getParticipantes()).isEmpty();
+    }
+
 
 
 
