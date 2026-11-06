@@ -444,6 +444,13 @@ public class ReservaDomainStructuralTest {
         assertThatThrownBy(()->new Participante(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("nome do participante é obrigatório.");
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveLancarIllegalArgumentExceptionSeNomeDoParticipanteForEmBranco(){
+        assertThatThrownBy(()->new Participante("")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("nome do participante é obrigatório.");
+    }
+
 
 
 
