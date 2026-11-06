@@ -208,6 +208,36 @@ public class ReservaServiceTddTest {
     @Test
     @Tag("UnitTest")
     @Tag("TDD")
+    void deveRejeitarEdicaoDeReservaCancelada() {
+        UUID salaId = UUID.randomUUID();
+        PeriodoReserva periodoOriginal = new PeriodoReserva(
+                LocalDateTime.of(2026, 10, 20, 9, 0),
+                LocalDateTime.of(2026, 10, 20, 10, 0)
+        );
+        Reserva reservaCancelada = new Reserva(
+                UUID.randomUUID(), salaId, "Pedro", periodoOriginal, StatusReserva.CANCELADA
+        );
+        reservas.put(reservaCancelada.getId(), reservaCancelada);
+        Reserva alteracoes = new Reserva(
+                reservaCancelada.getId(), salaId, "Maria",
+                new PeriodoReserva(
+                        LocalDateTime.of(2026, 10, 20, 11, 0),
+                        LocalDateTime.of(2026, 10, 20, 12, 0)
+                ),
+                StatusReserva.CONFIRMADA
+        );
+
+        assertThatThrownBy(() -> service.editarReserva(alteracoes))
+                .isInstanceOf(ReservaCanceladaException.class)
+                .hasMessageContaining("não está mais ativa");
+        assertThat(reservaCancelada.getStatus()).isEqualTo(StatusReserva.CANCELADA);
+        assertThat(reservaCancelada.getSolicitante()).isEqualTo("Pedro");
+        assertThat(reservaCancelada.getPeriodo()).isEqualTo(periodoOriginal);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("TDD")
     void deveManterReservaOriginalQuandoEdicaoCriaConflito() {
         Sala sala = new Sala(UUID.randomUUID(), "Sala conflito", 8);
         service.getSalaRepository().salvar(sala);
