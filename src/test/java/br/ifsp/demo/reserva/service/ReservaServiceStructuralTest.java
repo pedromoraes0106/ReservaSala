@@ -244,22 +244,47 @@ public class ReservaServiceStructuralTest {
     @Tag("Structural")
     class HashCode {
 
-        @Test
-        void deveTerMesmoHashQuandoSalasForemIguais() {
-            UUID uuid = UUID.randomUUID();
-            Sala sala1 = new Sala(uuid, "lab1", 10);
-            Sala sala2 = new Sala(uuid, "lab1", 10);
+        @Nested
+        class SalaHashCode{
+            @Test
+            void deveTerMesmoHashQuandoSalasForemIguais() {
+                UUID uuid = UUID.randomUUID();
+                Sala sala1 = new Sala(uuid, "lab1", 10);
+                Sala sala2 = new Sala(uuid, "lab1", 10);
 
-            assertThat(sala1.hashCode()).isEqualTo(sala2.hashCode());
+                assertThat(sala1.hashCode()).isEqualTo(sala2.hashCode());
+            }
+
+            @Test
+            void deveTerHashDiferenteQuandoSalasForemDiferentes() {
+
+                Sala sala1 = new Sala(UUID.randomUUID(), "lab1", 10);
+                Sala sala2 = new Sala(UUID.randomUUID(), "lab2", 20);
+
+                assertThat(sala1.hashCode()).isNotEqualTo(sala2.hashCode());
+            }
         }
 
-        @Test
-        void deveTerHashDiferenteQuandoSalasForemDiferentes() {
+        @Nested
+        class PeriodoReservaHashCode{
+            private static final LocalDateTime INICIO = LocalDateTime.of(2026, 11, 10, 8, 0);
+            private static final LocalDateTime FIM = LocalDateTime.of(2026, 11, 10, 10, 0);
 
-            Sala sala1 = new Sala(UUID.randomUUID(), "lab1", 10);
-            Sala sala2 = new Sala(UUID.randomUUID(), "lab2", 20);
+            @Test
+            void deveTerMesmoHashQuandoPeriodosForemIguais() {
+                PeriodoReserva periodo1 = new PeriodoReserva(INICIO, FIM);
+                PeriodoReserva periodo2 = new PeriodoReserva(INICIO, FIM);
 
-            assertThat(sala1.hashCode()).isNotEqualTo(sala2.hashCode());
+                assertThat(periodo1.hashCode()).isEqualTo(periodo2.hashCode());
+            }
+
+            @Test
+            void deveTerHashDiferenteQuandoPeriodosForemDiferentes() {
+                PeriodoReserva periodo1 = new PeriodoReserva(INICIO, FIM);
+                PeriodoReserva periodo2 = new PeriodoReserva(INICIO.plusDays(1), FIM.plusDays(1));
+
+                assertThat(periodo1.hashCode()).isNotEqualTo(periodo2.hashCode());
+            }
         }
     }
 
