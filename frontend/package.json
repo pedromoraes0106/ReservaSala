@@ -1,0 +1,15 @@
+{
+  "name": "reservasala-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interface Web do ReservaSala",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.2.2"
+  }
+}

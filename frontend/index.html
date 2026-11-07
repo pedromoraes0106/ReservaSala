@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#172554">
+  <title>ReservaSala</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <section id="authView" class="auth-shell">
+      <aside class="auth-brand">
+        <div class="brand-mark">RS</div>
+        <p class="eyebrow">Gestão inteligente</p>
+        <h1>Reserve espaços.<br>Conecte pessoas.</h1>
+        <p>Encontre salas, organize reuniões e acompanhe todas as reservas em um só lugar.</p>
+      </aside>
+      <main class="auth-card">
+        <div class="auth-card-head">
+          <button class="api-link" id="apiSettingsButton" type="button">Configurar API</button>
+        </div>
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="login">Entrar</button>
+          <button class="tab" data-tab="register">Criar conta</button>
+        </div>
+        <form id="loginForm" class="auth-form">
+          <div><label>E-mail</label><input name="username" type="email" autocomplete="username" required placeholder="voce@email.com"></div>
+          <div><label>Senha</label><input name="password" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+          <button class="primary" type="submit">Entrar</button>
+        </form>
+        <form id="registerForm" class="auth-form hidden">
+          <div class="field-grid"><div><label>Nome</label><input name="name" required></div><div><label>Sobrenome</label><input name="lastname" required></div></div>
+          <div><label>E-mail</label><input name="email" type="email" required></div>
+          <div><label>Senha</label><input name="password" type="password" minlength="6" required></div>
+          <button class="primary" type="submit">Criar conta</button>
+        </form>
+        <p id="authMessage" class="message" role="alert"></p>
+      </main>
+    </section>
+
+    <div id="dashboardView" class="dashboard hidden">
+      <aside class="sidebar">
+        <div class="brand"><div class="brand-mark small">RS</div><strong>ReservaSala</strong></div>
+        <nav>
+          <button class="nav-item active" data-section="reservations">Reservas</button>
+          <button class="nav-item" data-section="rooms">Salas</button>
+        </nav>
+        <button id="logoutButton" class="logout">Sair</button>
+      </aside>
+      <main class="content">
+        <header><div><p class="eyebrow dark">Área de trabalho</p><h1 id="pageTitle">Reservas</h1></div><button class="api-link" id="apiSettingsButtonDashboard">API: <span id="apiLabel"></span></button></header>
+        <section id="reservationsSection">
+          <div class="toolbar"><button id="newReservationButton" class="primary compact">Nova reserva</button></div>
+          <div id="reservationsList" class="cards-grid"></div>
+        </section>
+        <section id="roomsSection" class="hidden">
+          <div class="toolbar"><button id="newRoomButton" class="primary compact">Nova sala</button></div>
+          <div id="roomsList" class="cards-grid"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="reservationModal">
+    <form id="reservationForm">
+      <div class="modal-head"><h2>Nova reserva</h2><button class="close" type="button" data-close-dialog="reservationModal" aria-label="Fechar">×</button></div>
+      <label>Sala</label><select name="salaId" required></select>
+      <label>Solicitante</label><input name="solicitante" required placeholder="Nome do responsável">
+      <div class="field-grid"><div><label>Início</label><input name="inicio" type="datetime-local" required></div><div><label>Fim</label><input name="fim" type="datetime-local" required></div></div>
+      <p class="message" data-modal-message></p>
+      <button class="primary" value="default" type="submit">Criar reserva</button>
+    </form>
+  </dialog>
+
+  <dialog id="roomModal">
+    <form id="roomForm">
+      <div class="modal-head"><h2>Nova sala</h2><button class="close" type="button" data-close-dialog="roomModal" aria-label="Fechar">×</button></div>
+      <label>Nome</label><input name="nome" required placeholder="Sala de reuniões">
+      <label>Capacidade</label><input name="capacidade" type="number" min="1" required>
+      <p class="message" data-modal-message></p>
+      <button class="primary" value="default" type="submit">Cadastrar sala</button>
+    </form>
+  </dialog>
+
+  <dialog id="apiModal">
+    <form id="apiForm">
+      <div class="modal-head"><h2>Endereço da API</h2><button class="close" type="button" data-close-dialog="apiModal" aria-label="Fechar">×</button></div>
+      <label>URL base</label><input id="apiUrl" type="url" required placeholder="https://api.exemplo.com">
+      <small>Exemplo: http://localhost:8080. O endereço não deve terminar com /api.</small>
+      <button class="primary" type="submit">Salvar</button>
+    </form>
+  </dialog>
+
+  <aside id="apiResponsePanel" class="api-response-panel" aria-live="polite">
+    <button id="apiResponseToggle" class="api-response-toggle" type="button" aria-expanded="false">
+      <span>Respostas da API</span><span id="apiResponseStatus" class="api-response-status">Aguardando</span>
+    </button>
+    <div id="apiResponseContent" class="api-response-content hidden">
+      <div class="api-response-actions"><strong>Última resposta</strong><button id="apiResponseClear" type="button">Limpar</button></div>
+      <pre id="apiResponseBody">Nenhuma requisição realizada.</pre>
+    </div>
+  </aside>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
