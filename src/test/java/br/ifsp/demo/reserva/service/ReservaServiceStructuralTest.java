@@ -21,6 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 public class ReservaServiceStructuralTest {
@@ -34,6 +35,21 @@ public class ReservaServiceStructuralTest {
         assertThatThrownBy(() -> service.criarReserva(null, "Pedro", periodoValido()))
                 .isInstanceOf(SalaNaoEncontradaException.class)
                 .hasMessageContaining("identificador informado é inválido");
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveLancarExcecaoAoCancelarReservaComIdNulo() {
+        SalaRepository salaRepository = mock(SalaRepository.class);
+        ReservaRepository reservaRepository = mock(ReservaRepository.class);
+        ReservaService service = new ReservaService(salaRepository, reservaRepository);
+
+        assertThatThrownBy(() -> service.cancelarReserva(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("identificador da reserva é obrigatório.");
+
+        verifyNoInteractions(reservaRepository);
     }
 
     @Test
