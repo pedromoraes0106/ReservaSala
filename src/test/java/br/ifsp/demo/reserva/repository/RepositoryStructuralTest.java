@@ -32,8 +32,6 @@ public class RepositoryStructuralTest {
     private static final LocalDateTime INICIO = LocalDateTime.of(2026, 11, 6, 9, 0);
     private static final LocalDateTime FIM = INICIO.plusHours(1);
 
-    // ---------- JdbcReservaRepository ----------
-
     @Test
     @Tag("UnitTest")
     @Tag("Structural")
@@ -218,8 +216,6 @@ public class RepositoryStructuralTest {
                 eq("Joao"));
     }
 
-    // ---------- JdbcSalaRepository ----------
-
     @Test
     @Tag("UnitTest")
     @Tag("Structural")
@@ -348,9 +344,6 @@ public class RepositoryStructuralTest {
         assertThat(repository.existePorNome("Sala 01")).isFalse();
     }
 
-    // ---------- Helpers ----------
-
-    // Matchers tipados: evitam o aviso de "unchecked" que any(RowMapper.class) gera.
     private static RowMapper<Reserva> reservaMapper() {
         return any();
     }
@@ -365,7 +358,6 @@ public class RepositoryStructuralTest {
 
     private JdbcTemplate jdbcQueMapeiaReserva(UUID reservaId, UUID salaId, boolean comParticipante) {
         JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        // O mesmo mock atende a consulta de Reserva e a de Participante, por isso RowMapper<Object>.
         when(jdbcTemplate.query(anyString(), qualquerMapper(), any(Object[].class))).thenAnswer(invocation -> {
             String sql = invocation.getArgument(0);
             RowMapper<Object> mapper = invocation.getArgument(1);
