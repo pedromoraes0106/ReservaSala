@@ -4,6 +4,7 @@ import br.ifsp.demo.exception.ApiExceptionHandlerTddTest;
 import br.ifsp.demo.reserva.domain.SalaTest;
 import br.ifsp.demo.reserva.service.*;
 import br.ifsp.demo.reserva.controller.RestControllerStructuralTest;
+import br.ifsp.demo.reserva.repository.RepositoryStructuralTest;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
@@ -13,9 +14,10 @@ import org.junit.platform.suite.api.Suite;
 	SalaServiceTddTest.class,
 	ApiExceptionHandlerTddTest.class,
 	ReservaServiceFunctionalTest.class,
-		ReservaDomainStructuralTest.class,
+	ReservaDomainStructuralTest.class,
 	ReservaServiceStructuralTest.class,
 	RestControllerStructuralTest.class,
+	RepositoryStructuralTest.class,
 	SalaTest.class
 })
 public class AllUnitTestSuite {
