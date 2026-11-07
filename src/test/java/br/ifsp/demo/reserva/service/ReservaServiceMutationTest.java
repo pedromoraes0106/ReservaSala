@@ -1,9 +1,6 @@
 package br.ifsp.demo.reserva.service;
 
-import br.ifsp.demo.reserva.domain.PeriodoReserva;
-import br.ifsp.demo.reserva.domain.Reserva;
-import br.ifsp.demo.reserva.domain.Sala;
-import br.ifsp.demo.reserva.domain.StatusReserva;
+import br.ifsp.demo.reserva.domain.*;
 import br.ifsp.demo.reserva.repository.ReservaRepository;
 import br.ifsp.demo.reserva.repository.SalaRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +17,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -87,4 +85,32 @@ public class ReservaServiceMutationTest {
         assertThat(reservaExistente.getSalaId()).isEqualTo(salaNovaId);
         verify(reservaRepository).salvar(reservaExistente);
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void naoDeveLancarConflitoQuandoReservaExistenteNaoSobrepoeOPeriodo() {
+        UUID salaId = UUID.randomUUID();
+        LocalDateTime inicio = LocalDateTime.of(2026, 11, 10, 10, 0);
+        LocalDateTime fim = LocalDateTime.of(2026, 11, 10, 11, 0);
+        PeriodoReserva periodoSolicitado = new PeriodoReserva(inicio, fim);
+
+        PeriodoReserva periodoExistente = new PeriodoReserva(
+                LocalDateTime.of(2026, 11, 10, 14, 0),
+                LocalDateTime.of(2026, 11, 10, 15, 0));
+        Reserva reservaExistente = new Reserva(UUID.randomUUID(), salaId, "Joao", periodoExistente, StatusReserva.CONFIRMADA);
+
+        Sala sala = mock(Sala.class);
+        when(sala.getId()).thenReturn(salaId);
+        when(salaRepository.buscarPorId(salaId)).thenReturn(Optional.of(sala));
+        when(reservaRepository.buscarPorSalaEPeriodo(salaId, inicio, fim)).thenReturn(List.of(reservaExistente));
+        when(reservaRepository.salvar(any(Reserva.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Reserva resultado = service.criarReserva(salaId, "Maria", periodoSolicitado);
+
+        assertThat(resultado.getSalaId()).isEqualTo(salaId);
+        assertThat(resultado.getStatus()).isEqualTo(StatusReserva.CONFIRMADA);
+        verify(reservaRepository).salvar(any(Reserva.class));
+    }
+
 }
