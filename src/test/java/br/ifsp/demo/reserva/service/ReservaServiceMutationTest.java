@@ -160,4 +160,27 @@ public class ReservaServiceMutationTest {
                 .containsExactly("Ana");
         verify(reservaRepository).salvar(reserva);
     }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void deveRetornarAReservaSalvaAoAdicionarParticipante() {
+        UUID reservaId = UUID.randomUUID();
+        UUID salaId = UUID.randomUUID();
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 11, 10, 10, 0),
+                LocalDateTime.of(2026, 11, 10, 11, 0));
+
+        Reserva reserva = new Reserva(reservaId, salaId, "Maria", periodo, StatusReserva.CONFIRMADA);
+
+        when(reservaRepository.buscarPorId(reservaId)).thenReturn(Optional.of(reserva));
+        when(reservaRepository.salvar(reserva)).thenReturn(reserva);
+
+        Reserva resultado = service.adicionarParticipante(reservaId, "Ana");
+
+        assertThat(resultado).isSameAs(reserva);
+        assertThat(resultado.getParticipantes())
+                .extracting(Participante::getNome)
+                .containsExactly("Ana");
+    }
 }
