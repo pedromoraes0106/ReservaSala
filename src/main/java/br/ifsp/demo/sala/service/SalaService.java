@@ -7,6 +7,7 @@ import br.ifsp.demo.reserva.repository.SalaRepository;
 import br.ifsp.demo.sala.exception.NomeEmUsoException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
@@ -19,6 +20,10 @@ public class SalaService {
     public SalaService(SalaRepository salaRepository, ReservaRepository reservaRepository) {
         this.salaRepository = salaRepository;
         this.reservaRepository = reservaRepository;
+    }
+
+    public List<Sala> listarSalas() {
+        return salaRepository.listarTodas();
     }
 
     public Sala cadastrarSala(String nome, int capacidade) {

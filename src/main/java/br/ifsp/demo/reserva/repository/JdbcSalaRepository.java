@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +23,11 @@ public class JdbcSalaRepository implements SalaRepository {
             rs.getString("nome"),
             rs.getInt("capacidade")
     );
+
+    @Override
+    public List<Sala> listarTodas() {
+        return jdbcTemplate.query("SELECT * FROM sala ORDER BY nome", ROW_MAPPER);
+    }
 
     @Override
     public Optional<Sala> buscarPorId(UUID id) {
