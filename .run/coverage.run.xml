@@ -1,0 +1,37 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="coverage" type="JUnit" factoryName="JUnit">
+    <module name="demo-auth-app" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="br.ifsp.demo.controller.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+      <pattern>
+        <option name="PATTERN" value="br.ifsp.demo.exception.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+      <pattern>
+        <option name="PATTERN" value="br.ifsp.demo.repository.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+      <pattern>
+        <option name="PATTERN" value="br.ifsp.demo.reserva.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+      <pattern>
+        <option name="PATTERN" value="br.ifsp.demo.sala.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="ALTERNATIVE_JRE_PATH" value="21" />
+    <option name="PACKAGE_NAME" value="br.ifsp.demo.reserva.suite" />
+    <option name="MAIN_CLASS_NAME" value="br.ifsp.demo.reserva.suite.AllUnitTestSuite" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="tags" />
+    <tag value="UnitTest" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
