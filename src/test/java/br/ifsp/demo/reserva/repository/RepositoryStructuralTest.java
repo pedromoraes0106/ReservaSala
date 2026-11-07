@@ -75,6 +75,29 @@ public class RepositoryStructuralTest {
     @Test
     @Tag("UnitTest")
     @Tag("Structural")
+    void deveRetornarListaVaziaNoMetodoPadraoDeListarTodas() {
+        SalaRepository repository = new SalaRepository() {
+            @Override
+            public Optional<Sala> buscarPorId(UUID id) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Sala salvar(Sala sala) {
+                return sala;
+            }
+
+            @Override
+            public void remover(UUID id) {
+            }
+        };
+
+        assertThat(repository.listarTodas()).isEmpty();
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
     void deveCarregarReservaEParticipantesQuandoBuscaPorIdEncontraReserva() {
         UUID reservaId = UUID.randomUUID();
         UUID salaId = UUID.randomUUID();
