@@ -113,4 +113,51 @@ public class ReservaServiceMutationTest {
         verify(reservaRepository).salvar(any(Reserva.class));
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void deveExcluirParticipanteAnaMantendoBruno() {
+        UUID reservaId = UUID.randomUUID();
+        UUID salaId = UUID.randomUUID();
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 11, 10, 10, 0),
+                LocalDateTime.of(2026, 11, 10, 11, 0));
+
+        Reserva reserva = new Reserva(reservaId, salaId, "Maria", periodo, StatusReserva.CONFIRMADA);
+        reserva.adicionarParticipante(new Participante("Ana"));
+        reserva.adicionarParticipante(new Participante("Bruno"));
+
+        when(reservaRepository.buscarPorId(reservaId)).thenReturn(Optional.of(reserva));
+
+        service.excluirParticipante(reservaId, "Ana");
+
+        assertThat(reserva.getParticipantes())
+                .extracting(Participante::getNome)
+                .containsExactly("Bruno");
+        verify(reservaRepository).salvar(reserva);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void deveExcluirParticipanteBrunoMantendoAna() {
+        UUID reservaId = UUID.randomUUID();
+        UUID salaId = UUID.randomUUID();
+        PeriodoReserva periodo = new PeriodoReserva(
+                LocalDateTime.of(2026, 11, 10, 10, 0),
+                LocalDateTime.of(2026, 11, 10, 11, 0));
+
+        Reserva reserva = new Reserva(reservaId, salaId, "Maria", periodo, StatusReserva.CONFIRMADA);
+        reserva.adicionarParticipante(new Participante("Ana"));
+        reserva.adicionarParticipante(new Participante("Bruno"));
+
+        when(reservaRepository.buscarPorId(reservaId)).thenReturn(Optional.of(reserva));
+
+        service.excluirParticipante(reservaId, "Bruno");
+
+        assertThat(reserva.getParticipantes())
+                .extracting(Participante::getNome)
+                .containsExactly("Ana");
+        verify(reservaRepository).salvar(reserva);
+    }
 }
