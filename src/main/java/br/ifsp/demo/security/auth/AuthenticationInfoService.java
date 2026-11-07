@@ -8,6 +8,13 @@ import java.util.UUID;
 
 @Service
 public class AuthenticationInfoService {
+    public User getAuthenticatedUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof User user))
+            throw new IllegalStateException("Unauthorized user request.");
+        return user;
+    }
+
     public UUID getAuthenticatedUserId() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated())

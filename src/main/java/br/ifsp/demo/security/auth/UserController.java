@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final AuthenticationService authenticationService;
+    private final AuthenticationInfoService authenticationInfoService;
 
-    public UserController(AuthenticationService authenticationService) {
+    public UserController(AuthenticationService authenticationService, AuthenticationInfoService authenticationInfoService) {
         this.authenticationService = authenticationService;
+        this.authenticationInfoService = authenticationInfoService;
     }
 
     @Operation(
@@ -71,6 +73,15 @@ public class UserController {
                     content = @Content(schema = @Schema(hidden = true))
             )
     })
+    @org.springframework.web.bind.annotation.GetMapping("/me")
+    public ResponseEntity<?> authenticatedUser() {
+        br.ifsp.demo.security.user.User user = authenticationInfoService.getAuthenticatedUser();
+        return ResponseEntity.ok(java.util.Map.of(
+                "email", user.getEmail(),
+                "role", user.getRole().name()
+        ));
+    }
+
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody AuthRequest request) {
         AuthResponse response = authenticationService.authenticate(request);
