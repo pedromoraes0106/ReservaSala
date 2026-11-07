@@ -174,6 +174,20 @@ public class SalaServiceStructuralTest {
         verify(salaRepository).remover(salaId);
     }
 
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveListarTodasAsSalas() {
+        Sala sala1 = new Sala(UUID.randomUUID(), "Sala 01", 10);
+        Sala sala2 = new Sala(UUID.randomUUID(), "Sala 02", 20);
+        when(salaRepository.listarTodas()).thenReturn(List.of(sala1, sala2));
+
+        List<Sala> resultado = service.listarSalas();
+
+        assertThat(resultado).containsExactly(sala1, sala2);
+        verify(salaRepository).listarTodas();
+    }
+
     private Reserva reservaComParticipantes(UUID salaId, int quantidade) {
         LocalDateTime inicio = LocalDateTime.now().plusDays(1);
         Reserva reserva = new Reserva(

@@ -202,6 +202,24 @@ public class RestControllerStructuralTest {
     @Test
     @Tag("UnitTest")
     @Tag("Structural")
+    void deveListarSalas() {
+        SalaService service = mock(SalaService.class);
+        SalaController controller = new SalaController(service);
+        List<Sala> salas = List.of(
+                new Sala(UUID.randomUUID(), "Sala 01", 10),
+                new Sala(UUID.randomUUID(), "Sala 02", 20));
+        when(service.listarSalas()).thenReturn(salas);
+
+        ResponseEntity<List<Sala>> response = controller.listar();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isSameAs(salas);
+        verify(service).listarSalas();
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
     void deveEditarSala() {
         SalaService service = mock(SalaService.class);
         SalaController controller = new SalaController(service);

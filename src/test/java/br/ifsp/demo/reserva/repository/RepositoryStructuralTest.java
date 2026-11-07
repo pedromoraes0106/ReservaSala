@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +32,32 @@ public class RepositoryStructuralTest {
 
     private static final LocalDateTime INICIO = LocalDateTime.of(2026, 11, 6, 9, 0);
     private static final LocalDateTime FIM = INICIO.plusHours(1);
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Structural")
+    void deveListarTodasAsSalas() {
+        UUID salaId = UUID.randomUUID();
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        when(jdbcTemplate.query(anyString(), salaMapper()))
+                .thenAnswer(invocation -> {
+                    RowMapper<Sala> mapper = invocation.getArgument(1);
+                    ResultSet rs = mock(ResultSet.class);
+                    when(rs.getString("id")).thenReturn(salaId.toString());
+                    when(rs.getString("nome")).thenReturn("Sala 01");
+                    when(rs.getInt("capacidade")).thenReturn(10);
+                    return List.of(Objects.requireNonNull(mapper.mapRow(rs, 0)));
+                });
+        JdbcSalaRepository repository = new JdbcSalaRepository(jdbcTemplate);
+
+        List<Sala> resultado = repository.listarTodas();
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.getFirst().getId()).isEqualTo(salaId);
+        assertThat(resultado.getFirst().getNome()).isEqualTo("Sala 01");
+        assertThat(resultado.getFirst().getCapacidade()).isEqualTo(10);
+        verify(jdbcTemplate).query(contains("ORDER BY nome"), salaMapper());
+    }
 
     @Test
     @Tag("UnitTest")
