@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -60,6 +61,30 @@ public class ReservaServiceMutationTest {
 
         assertDoesNotThrow(() -> service.editarReserva(reservaEditada));
 
+        verify(reservaRepository).salvar(reservaExistente);
+    }
+
+    @Test
+    @Tag("UnitTest")
+    @Tag("Mutation")
+    void deveAtualizarSalaDaReservaAoEditar() {
+        UUID reservaId = UUID.randomUUID();
+        UUID salaOriginalId = UUID.randomUUID();
+        UUID salaNovaId = UUID.randomUUID();
+        LocalDateTime inicio = LocalDateTime.of(2026, 11, 10, 10, 0);
+        LocalDateTime fim = LocalDateTime.of(2026, 11, 10, 11, 0);
+        PeriodoReserva periodo = new PeriodoReserva(inicio, fim);
+
+        Reserva reservaExistente = new Reserva(reservaId, salaOriginalId, "Maria", periodo, StatusReserva.CONFIRMADA);
+        Reserva reservaEditada = new Reserva(reservaId, salaNovaId, "Maria", periodo, StatusReserva.CONFIRMADA);
+
+        when(reservaRepository.buscarPorId(reservaId)).thenReturn(Optional.of(reservaExistente));
+        when(salaRepository.buscarPorId(salaNovaId)).thenReturn(Optional.of(mock(Sala.class)));
+        when(reservaRepository.buscarPorSalaEPeriodo(salaNovaId, inicio, fim)).thenReturn(List.of());
+
+        service.editarReserva(reservaEditada);
+
+        assertThat(reservaExistente.getSalaId()).isEqualTo(salaNovaId);
         verify(reservaRepository).salvar(reservaExistente);
     }
 }
