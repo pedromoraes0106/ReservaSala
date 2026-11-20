@@ -35,4 +35,34 @@ class SalaControllerTest extends BaseApiIntegrationTest {
                 .body("nome", equalTo(nome))
                 .body("capacidade", equalTo(10));
     }
+
+    @Test
+    @DisplayName("Deve retornar 400 ao cadastrar sala com capacidade zero")
+    void deveRetornar400ComCapacidadeZero() {
+        var token = registrarEAutenticar();
+
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body(Map.of("nome", "Sala " + faker.number().digits(5), "capacidade", 0))
+                .when()
+                .post("/api/salas")
+                .then()
+                .log().ifValidationFails(LogDetail.BODY)
+                .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("Deve retornar 401 ao cadastrar sala sem token")
+    void deveRetornar401SemToken() {
+        given()
+                .contentType("application/json")
+                .body(Map.of("nome", "Sala " + faker.number().digits(5), "capacidade", 10))
+                .when()
+                .post("/api/salas")
+                .then()
+                .statusCode(401);
+    }
+
+
 }
